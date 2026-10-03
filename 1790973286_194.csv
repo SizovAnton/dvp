@@ -1,0 +1,745 @@
+"Account_Domain","Account_Name","Authentication_Package",CommandLine,Company,ComputerName,"Creator_Process_ID","Creator_Process_Name",CurrentDirectory,Description,"Elevated_Token",EventCode,EventType,FileVersion,Hashes,Image,"Impersonation_Level",IntegrityLevel,"Key_Length",Keywords,"Linked_Logon_ID",LogName,LogonGuid,LogonId,"Logon_GUID","Logon_ID","Logon_Process","Logon_Type","Mandatory_Label",Message,"Network_Account_Domain","Network_Account_Name","New_Process_ID","New_Process_Name",OpCode,OriginalFileName,"Package_Name__NTLM_only_",ParentCommandLine,ParentImage,ParentProcessGuid,ParentProcessId,ParentUser,Privileges,ProcessGuid,ProcessId,"Process_Command_Line","Process_ID","Process_Name",Product,RecordNumber,"Restricted_Admin_Mode",RuleName,"Security_ID",Sid,SidType,SourceName,"Source_Network_Address","Source_Port",TaskCategory,TerminalSessionId,"Token_Elevation_Type","Transited_Services",Type,User,UtcTime,"Virtual_Account","Workstation_Name","_raw","_time",eventtype,host,index,linecount,punct,source,sourcetype,"splunk_server","splunk_server_group",tag,"tag::eventtype"
+,,,"net  localgroup","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:27:53.793
+ProcessGuid: {5EF3D573-13C9-6AC0-BA01-000000001000}
+ProcessId: 2008
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-13C9-6AC0-B301-000000001000}
+ParentProcessId: 996
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-13C9-6AC0-B301-000000001000}",996,"CORP\Administrator",,"{5EF3D573-13C9-6AC0-BA01-000000001000}",2008,,,,"Microsoft® Windows® Operating System",7067,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:27:53.793",,,"10/02/2026 11:27:53.793 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7067
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:27:53.793
+ProcessGuid: {5EF3D573-13C9-6AC0-BA01-000000001000}
+ProcessId: 2008
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-13C9-6AC0-B301-000000001000}
+ParentProcessId: 996
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:27:53.793+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup ""Users""","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:27:53.777
+ProcessGuid: {5EF3D573-13C9-6AC0-B801-000000001000}
+ProcessId: 1428
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-13C9-6AC0-B301-000000001000}
+ParentProcessId: 996
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-13C9-6AC0-B301-000000001000}",996,"CORP\Administrator",,"{5EF3D573-13C9-6AC0-B801-000000001000}",1428,,,,"Microsoft® Windows® Operating System",7065,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:27:53.777",,,"10/02/2026 11:27:53.777 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7065
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:27:53.777
+ProcessGuid: {5EF3D573-13C9-6AC0-B801-000000001000}
+ProcessId: 1428
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-13C9-6AC0-B301-000000001000}
+ParentProcessId: 996
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:27:53.777+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  user","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:27:53.751
+ProcessGuid: {5EF3D573-13C9-6AC0-B501-000000001000}
+ProcessId: 2276
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-13C9-6AC0-B301-000000001000}
+ParentProcessId: 996
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-13C9-6AC0-B301-000000001000}",996,"CORP\Administrator",,"{5EF3D573-13C9-6AC0-B501-000000001000}",2276,,,,"Microsoft® Windows® Operating System",7062,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:27:53.751",,,"10/02/2026 11:27:53.752 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7062
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:27:53.751
+ProcessGuid: {5EF3D573-13C9-6AC0-B501-000000001000}
+ProcessId: 2276
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-13C9-6AC0-B301-000000001000}
+ParentProcessId: 996
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:27:53.752+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:26:05.711
+ProcessGuid: {5EF3D573-135D-6AC0-A101-000000001000}
+ProcessId: 2064
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-135D-6AC0-9A01-000000001000}
+ParentProcessId: 4976
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-135D-6AC0-9A01-000000001000}",4976,"CORP\Administrator",,"{5EF3D573-135D-6AC0-A101-000000001000}",2064,,,,"Microsoft® Windows® Operating System",7043,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:26:05.711",,,"10/02/2026 11:26:05.711 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7043
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:26:05.711
+ProcessGuid: {5EF3D573-135D-6AC0-A101-000000001000}
+ProcessId: 2064
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-135D-6AC0-9A01-000000001000}
+ParentProcessId: 4976
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:26:05.711+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup ""Users""","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:26:05.697
+ProcessGuid: {5EF3D573-135D-6AC0-9F01-000000001000}
+ProcessId: 5088
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-135D-6AC0-9A01-000000001000}
+ParentProcessId: 4976
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-135D-6AC0-9A01-000000001000}",4976,"CORP\Administrator",,"{5EF3D573-135D-6AC0-9F01-000000001000}",5088,,,,"Microsoft® Windows® Operating System",7041,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:26:05.697",,,"10/02/2026 11:26:05.698 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7041
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:26:05.697
+ProcessGuid: {5EF3D573-135D-6AC0-9F01-000000001000}
+ProcessId: 5088
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-135D-6AC0-9A01-000000001000}
+ParentProcessId: 4976
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:26:05.698+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  user","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:26:05.674
+ProcessGuid: {5EF3D573-135D-6AC0-9C01-000000001000}
+ProcessId: 4480
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-135D-6AC0-9A01-000000001000}
+ParentProcessId: 4976
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-135D-6AC0-9A01-000000001000}",4976,"CORP\Administrator",,"{5EF3D573-135D-6AC0-9C01-000000001000}",4480,,,,"Microsoft® Windows® Operating System",7038,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:26:05.674",,,"10/02/2026 11:26:05.675 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7038
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:26:05.674
+ProcessGuid: {5EF3D573-135D-6AC0-9C01-000000001000}
+ProcessId: 4480
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-135D-6AC0-9A01-000000001000}
+ParentProcessId: 4976
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:26:05.675+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:24:11.677
+ProcessGuid: {5EF3D573-12EB-6AC0-8301-000000001000}
+ProcessId: 2532
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-12EB-6AC0-7C01-000000001000}
+ParentProcessId: 1464
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-12EB-6AC0-7C01-000000001000}",1464,"CORP\Administrator",,"{5EF3D573-12EB-6AC0-8301-000000001000}",2532,,,,"Microsoft® Windows® Operating System",7018,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:24:11.677",,,"10/02/2026 11:24:11.677 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7018
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:24:11.677
+ProcessGuid: {5EF3D573-12EB-6AC0-8301-000000001000}
+ProcessId: 2532
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-12EB-6AC0-7C01-000000001000}
+ParentProcessId: 1464
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:24:11.677+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup ""Users""","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:24:11.663
+ProcessGuid: {5EF3D573-12EB-6AC0-8101-000000001000}
+ProcessId: 2064
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-12EB-6AC0-7C01-000000001000}
+ParentProcessId: 1464
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-12EB-6AC0-7C01-000000001000}",1464,"CORP\Administrator",,"{5EF3D573-12EB-6AC0-8101-000000001000}",2064,,,,"Microsoft® Windows® Operating System",7016,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:24:11.663",,,"10/02/2026 11:24:11.664 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7016
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:24:11.663
+ProcessGuid: {5EF3D573-12EB-6AC0-8101-000000001000}
+ProcessId: 2064
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-12EB-6AC0-7C01-000000001000}
+ParentProcessId: 1464
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:24:11.664+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  user","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:24:11.637
+ProcessGuid: {5EF3D573-12EB-6AC0-7E01-000000001000}
+ProcessId: 1488
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-12EB-6AC0-7C01-000000001000}
+ParentProcessId: 1464
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-12EB-6AC0-7C01-000000001000}",1464,"CORP\Administrator",,"{5EF3D573-12EB-6AC0-7E01-000000001000}",1488,,,,"Microsoft® Windows® Operating System",7013,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:24:11.637",,,"10/02/2026 11:24:11.637 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=7013
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:24:11.637
+ProcessGuid: {5EF3D573-12EB-6AC0-7E01-000000001000}
+ProcessId: 1488
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-12EB-6AC0-7C01-000000001000}
+ParentProcessId: 1464
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:24:11.637+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:20:40.224
+ProcessGuid: {5EF3D573-1218-6AC0-5F01-000000001000}
+ProcessId: 740
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-1218-6AC0-5801-000000001000}
+ParentProcessId: 2368
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-1218-6AC0-5801-000000001000}",2368,"CORP\Administrator",,"{5EF3D573-1218-6AC0-5F01-000000001000}",740,,,,"Microsoft® Windows® Operating System",6984,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:20:40.224",,,"10/02/2026 11:20:40.225 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=6984
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:20:40.224
+ProcessGuid: {5EF3D573-1218-6AC0-5F01-000000001000}
+ProcessId: 740
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-1218-6AC0-5801-000000001000}
+ParentProcessId: 2368
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:20:40.225+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  localgroup ""Users""","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:20:40.210
+ProcessGuid: {5EF3D573-1218-6AC0-5D01-000000001000}
+ProcessId: 1400
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-1218-6AC0-5801-000000001000}
+ParentProcessId: 2368
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-1218-6AC0-5801-000000001000}",2368,"CORP\Administrator",,"{5EF3D573-1218-6AC0-5D01-000000001000}",1400,,,,"Microsoft® Windows® Operating System",6982,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:20:40.210",,,"10/02/2026 11:20:40.211 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=6982
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:20:40.210
+ProcessGuid: {5EF3D573-1218-6AC0-5D01-000000001000}
+ProcessId: 1400
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  localgroup ""Users"" 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-1218-6AC0-5801-000000001000}
+ParentProcessId: 2368
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:20:40.211+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,
+,,,"net  user","Microsoft Corporation","WIN-5D606EQID5C.corp.local",,,"C:\Users\ADMINI~1\AppData\Local\Temp\","Net Command",,1,4,"10.0.14393.0 (rs1_release.160715-1616)","MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468","C:\Windows\System32\net.exe",,High,,None,,"Microsoft-Windows-Sysmon/Operational","{5EF3D573-0C53-6AC0-32AA-030000000000}",0x3AA32,,,,,,"Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:20:40.174
+ProcessGuid: {5EF3D573-1218-6AC0-5A01-000000001000}
+ProcessId: 1336
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-1218-6AC0-5801-000000001000}
+ParentProcessId: 2368
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator",,,,,Info,"net.exe",,"""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup","C:\Windows\System32\cmd.exe","{5EF3D573-1218-6AC0-5801-000000001000}",2368,"CORP\Administrator",,"{5EF3D573-1218-6AC0-5A01-000000001000}",1336,,,,"Microsoft® Windows® Operating System",6979,,"-",,"S-1-5-18",0,"Microsoft-Windows-Sysmon",,,"Process Create (rule: ProcessCreate)",1,,,Information,"NOT_TRANSLATED
+CORP\Administrator","2026-10-02 20:20:40.174",,,"10/02/2026 11:20:40.177 PM
+LogName=Microsoft-Windows-Sysmon/Operational
+EventCode=1
+EventType=4
+ComputerName=WIN-5D606EQID5C.corp.local
+User=NOT_TRANSLATED
+Sid=S-1-5-18
+SidType=0
+SourceName=Microsoft-Windows-Sysmon
+Type=Information
+RecordNumber=6979
+Keywords=None
+TaskCategory=Process Create (rule: ProcessCreate)
+OpCode=Info
+Message=Process Create:
+RuleName: -
+UtcTime: 2026-10-02 20:20:40.174
+ProcessGuid: {5EF3D573-1218-6AC0-5A01-000000001000}
+ProcessId: 1336
+Image: C:\Windows\System32\net.exe
+FileVersion: 10.0.14393.0 (rs1_release.160715-1616)
+Description: Net Command
+Product: Microsoft® Windows® Operating System
+Company: Microsoft Corporation
+OriginalFileName: net.exe
+CommandLine: net  user 
+CurrentDirectory: C:\Users\ADMINI~1\AppData\Local\Temp\
+User: CORP\Administrator
+LogonGuid: {5EF3D573-0C53-6AC0-32AA-030000000000}
+LogonId: 0x3AA32
+TerminalSessionId: 1
+IntegrityLevel: High
+Hashes: MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468
+ParentProcessGuid: {5EF3D573-1218-6AC0-5801-000000001000}
+ParentProcessId: 2368
+ParentImage: C:\Windows\System32\cmd.exe
+ParentCommandLine: ""cmd.exe"" /c net user & dir c:\Users\ & cmdkey.exe /list & net localgroup ""Users"" & net localgroup
+ParentUser: CORP\Administrator","2026-10-02T22:20:40.177+0200",,"WIN-5D606EQID5C",main,38,"//_::._=--/===-..==---==--====__(:_)==_:\r:_-\r:_--_","WinEventLog:Microsoft-Windows-Sysmon/Operational","WinEventLog:Microsoft-Windows-Sysmon/Operational",stx,,,

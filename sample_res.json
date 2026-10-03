@@ -1,0 +1,8 @@
+[
+    {
+        "scenario": "Training",
+        "execution_success": true,
+        "telemetry_available": true,
+        "alert_triggering": false
+    }
+]

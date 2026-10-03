@@ -1,0 +1,30 @@
+title: Локальне перерахування облікових записів користувачів (net.exe)
+id: 5e638b9d-ec3b-468e-9080-60b64be1bc55
+status: experimental
+description: Виявляє спроби перерахування локальних облікових записів або членів груп за допомогою утиліти net.exe, що відповідає техніці MITRE ATT&CK T1087.001 (на основі тесту Atomic Red Team).
+references:
+    - https://github.com
+author: AI Security Analyst
+date: 2026/10/02
+tags:
+    - attack.discovery
+    - attack.t1087.001
+logsource:
+    product: windows
+    service: sysmon
+detection:
+    selection:
+        EventID: 1  # Process Creation
+        Image|endswith:
+            - '\net.exe'
+            - '\net1.exe'
+        CommandLine|contains:
+            - ' user'
+            - ' localgroup'
+            - ' group'
+    condition: selection
+falsepositives:
+    - Легітимні адміністративні скрипти або інструменти інвентаризації ПЗ.
+    - Дії системних адміністраторів під час аудіту користувачів.
+level: medium
+

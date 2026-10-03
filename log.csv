@@ -1,0 +1,3 @@
+"Execution Time (UTC)","Execution Time (Local)","Technique","Test Number","Test Name","Hostname","IP Address","Username","GUID","ProcessId","ExitCode"
+"2026-10-02T20:26:05Z","2026-10-02T23:26:05Z","T1087.001","8","Enumerate all accounts on Windows (Local)","WIN-5D606EQID5C","192.168.56.5","corp\administrator","80887bec-5a9b-4efc-a81d-f83eb2eb32ab","4976","0"
+"2026-10-02T20:27:53Z","2026-10-02T23:27:53Z","T1087.001","8","Enumerate all accounts on Windows (Local)","WIN-5D606EQID5C","192.168.56.5","corp\administrator","80887bec-5a9b-4efc-a81d-f83eb2eb32ab","996","0"
