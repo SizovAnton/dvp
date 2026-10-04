@@ -1,4 +1,3 @@
-from doctest import testmod
 import uuid
 from datetime import datetime
 
@@ -83,7 +82,7 @@ def link_atomic_runs(at_runs, events):
         })
     return results
 
-test = link_atomic_runs(atomic_log, xml_log)
+atomic_run = link_atomic_runs(atomic_log, xml_log)
 
 def yaml_handling(yaml_file):
     rules = load_sigma_rule(yaml_file)
@@ -104,18 +103,61 @@ def yaml_handling(yaml_file):
     
 rule = yaml_handling(yaml_rule)
 
-field = [
-    (r.get("Field"), r.get("Value")) 
-    for r in rule 
-    if r.get("Field") == "EventID"
-]
+def get_event_value(event: dict, field: str) -> str | None:
+    if field == "EventID":
+        return event.get("event_id")
 
-#def get_event_value(event: dict, field: str) -> str | None:
+    return event["data_fields"].get(field)
 
-for run_result in test:
-    for events in run_result["candidate_events"]:
-        print(events.get("event_id"))
+def get_items():
+    for run_result in atomic_run:
+        for event in run_result["candidate_events"]:
+            eventid = get_event_value(event, "EventID")
+            image = get_event_value(event, "Image")
+            command_line = get_event_value(event, "CommandLine")
+            missins = get_event_value(event, "MissingField")
 
-for r in rule:
-    if r.get("Field") == "EventID":
-        print("Horay")
+            yield eventid, image, command_line, missins
+
+def match_equals (actual: str | None, expected: str | int) -> bool:
+    if actual is None:
+        return False
+
+    return actual.casefold() == str(expected).casefold()
+
+match = [r["Value"] for r in rule]
+
+
+def match_endswith(actual: str | None, expected: str) -> bool:
+    if actual is None:
+        return False
+
+    return actual.casefold().endswith(expected.casefold())
+
+def command_line_check(actual: str | None, expected: str):
+    if actual is None:
+        return False
+
+    return actual.casefold() == expected.casefold()
+
+for evt, img, cl, miss in get_items():
+    matched_evt = match_equals(evt, match[0])
+
+    sufix_checks = []
+
+    for k in match[1]:
+        matched_img = match_endswith(img, k)
+        sufix_checks.append(matched_img)
+        
+    img_matches = any(sufix_checks)
+
+    rule_cl = []
+    if cl in match[2]:
+        print("Yap")
+
+    
+
+    
+
+
+    
