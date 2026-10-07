@@ -1,3 +1,4 @@
+from operator import contains
 import uuid
 from datetime import datetime
 
@@ -82,7 +83,7 @@ def link_atomic_runs(at_runs, events):
         })
     return results
 
-atomic_run = link_atomic_runs(atomic_log, xml_log)
+linked_runs = link_atomic_runs(atomic_log, xml_log)
 
 def yaml_handling(yaml_file):
     rules = load_sigma_rule(yaml_file)
@@ -110,15 +111,15 @@ def get_event_value(event: dict, field: str) -> str | None:
     return event["data_fields"].get(field)
 
 def get_items():
-    for run_result in atomic_run:
+    for run_result in linked_runs:
         for event in run_result["candidate_events"]:
             eventid = get_event_value(event, "EventID")
             image = get_event_value(event, "Image")
             command_line = get_event_value(event, "CommandLine")
             missins = get_event_value(event, "MissingField")
 
-            yield eventid, image, command_line, missins
-
+            yield eventid, image, command_line, missins, event        
+       
 def match_equals (actual: str | None, expected: str | int) -> bool:
     if actual is None:
         return False
@@ -127,23 +128,18 @@ def match_equals (actual: str | None, expected: str | int) -> bool:
 
 match = [r["Value"] for r in rule]
 
-
 def match_endswith(actual: str | None, expected: str) -> bool:
     if actual is None:
         return False
 
     return actual.casefold().endswith(expected.casefold())
 
-def command_line_check(actual: str | None, expected: str):
-    if actual is None:
-        return False
+results = []
 
-    return actual.casefold() == expected.casefold()
-
-for evt, img, cl, miss in get_items():
-    matched_evt = match_equals(evt, match[0])
-
+for evt, img, cl, miss, item in get_items():
     sufix_checks = []
+
+    matched_evt = match_equals(evt, match[0])
 
     for k in match[1]:
         matched_img = match_endswith(img, k)
@@ -151,13 +147,32 @@ for evt, img, cl, miss in get_items():
         
     img_matches = any(sufix_checks)
 
-    rule_cl = []
-    if cl in match[2]:
-        print("Yap")
-
+    rule_cl = match[2]
+    cl_val = cl or ""
     
-
+    checks_cl = [r.casefold() in cl_val.casefold() 
+                 for r in rule_cl]
     
+    cl_matches = any(checks_cl)
+
+    selection = matched_evt and img_matches and cl_matches
+    res = {
+        "Record ID" : item["record_id"],
+        "Checks": {
+            "Image Match": img_matches,
+            "Command Line Match":cl_matches,
+            "Event Match": matched_evt
+        },
+        "Selection": selection
+    }
+    results.append(res)
+  
+total_count = len(results)
+total_selections = [result for result in results 
+            if result["Selection"]]
+total_selections_count = len(total_selections)
+
+rejected = [res for res in results if not res["Selection"]]
 
 
     
