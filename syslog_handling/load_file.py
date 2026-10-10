@@ -1,6 +1,7 @@
 import csv
 import xml.etree.ElementTree as ET
 import yaml
+import json
 
 def load_csv_file(path: str):
 
@@ -24,3 +25,8 @@ def load_sigma_rule(yaml_file):
             raise ValueError("Dictionary only")
         
     return settings
+
+def load_sources_confsg(path):
+    with open(path, encoding="utf-8") as file:
+        return json.load(file)
+

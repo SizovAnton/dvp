@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "description": "Події Sysmon"
+    }
+  ]
+}
