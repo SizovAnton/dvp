@@ -5,9 +5,11 @@
   },
   "sources": [
     {
-      "channel": "Microsoft-Windows-Sysmon/Operational",
-      "provider": "Microsoft-Windows-Sysmon",
-      "description": "Події Sysmon"
-    }
+    "channel": "Microsoft-Windows-Sysmon/Operational",
+    "provider": "Microsoft-Windows-Sysmon",
+    "description": "Windows Sysmon",
+    "product": "windows",
+    "service": "sysmon"
+}
   ]
 }

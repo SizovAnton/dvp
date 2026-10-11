@@ -1,0 +1,186 @@
+[
+    {
+        "Record ID": "64f22b99-dde5-42f4-b483-d9c112865553",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe",
+            "CommandLine": "net  localgroup"
+        },
+        "Checks": {
+            "Image Match": true,
+            "Command Line Match": true,
+            "Event Match": true
+        },
+        "Selection": true,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "4cb75736-d8da-420d-b11f-44c3f4c4dd6d",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe",
+            "CommandLine": "net  localgroup \"Users\" "
+        },
+        "Checks": {
+            "Image Match": true,
+            "Command Line Match": true,
+            "Event Match": true
+        },
+        "Selection": true,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "83733a4e-a182-42f7-8b1d-b5c766132d97",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\cmdkey.exe",
+            "CommandLine": "cmdkey.exe  /list "
+        },
+        "Checks": {
+            "Image Match": false,
+            "Command Line Match": false,
+            "Event Match": true
+        },
+        "Selection": false,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "98fbf677-cb7c-4b1b-9f08-9e0904d442f4",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe",
+            "CommandLine": "net  user "
+        },
+        "Checks": {
+            "Image Match": true,
+            "Command Line Match": true,
+            "Event Match": true
+        },
+        "Selection": true,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "8b27dedd-33bb-44ec-a0c3-6890376e493e",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe",
+            "CommandLine": "net  localgroup"
+        },
+        "Checks": {
+            "Image Match": true,
+            "Command Line Match": true,
+            "Event Match": true
+        },
+        "Selection": true,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "24c866e3-32ff-4441-92cc-4c79d2e5fcc0",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe",
+            "CommandLine": "net  localgroup \"Users\" "
+        },
+        "Checks": {
+            "Image Match": true,
+            "Command Line Match": true,
+            "Event Match": true
+        },
+        "Selection": true,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "fa46720b-7717-4918-8b0f-894e522ea430",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\cmdkey.exe",
+            "CommandLine": "cmdkey.exe  /list "
+        },
+        "Checks": {
+            "Image Match": false,
+            "Command Line Match": false,
+            "Event Match": true
+        },
+        "Selection": false,
+        "Total": 8,
+        "Total Selections": 6
+    },
+    {
+        "Record ID": "57529092-e761-4d45-a39d-a62c65c9b2d4",
+        "Logsource": {
+            "Status": true,
+            "Checks": {
+                "product": true,
+                "service": true
+            }
+        },
+        "Values": {
+            "Event ID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe",
+            "CommandLine": "net  user "
+        },
+        "Checks": {
+            "Image Match": true,
+            "Command Line Match": true,
+            "Event Match": true
+        },
+        "Selection": true,
+        "Total": 8,
+        "Total Selections": 6
+    }
+]
