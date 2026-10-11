@@ -1,6 +1,9 @@
+from csv import Error
+from os import error
 import uuid
 import json
 from datetime import datetime
+from xml.sax import ErrorHandler
 
 from load_file import load_xml_file, load_csv_file, load_sigma_rule, load_sources_confsg
 
@@ -12,13 +15,17 @@ atomic_log = load_csv_file(art_log)
 yaml_rule = "/home/ash/Проекти/dvp/test_rule.yaml"
 ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
 config_file = "/home/ash/Проекти/dvp/config/source.json"
-
 configuration = load_sources_confsg(config_file)
 
-#def get_source_description()
+def config_handler(channel, provider, config):
+    
+    for source in configuration["sources"]:
+        if source["channel"] == channel and source["provider"] == provider:
+            return source["description"]
+        
+        return config["defaults"]["windows_event_log"]
 
-def process_events(xml, ns=ns):
-
+def process_events(xml, config, ns=ns):
     events_results = []
 
     for event in xml:
@@ -30,6 +37,8 @@ def process_events(xml, ns=ns):
             provider = provider_element.get("Name", "Unknown")
         else: 
             provider = "Unknown"
+
+        source_description = config_handler(channel, provider, config)
 
         event_id = event.findtext('ns:System/ns:EventID', default="Unknown", namespaces=ns,)
         computer = event.findtext('ns:System/ns:Computer', default="Unknown", namespaces=ns,)
@@ -55,13 +64,14 @@ def process_events(xml, ns=ns):
             "system_time": system_time,
             "data_fields": attributes,
             "channel" : channel,
-            "provider" : provider
+            "provider" : provider,
+            "source_description" : source_description
         })
 
     return events_results
 
-xml_log = process_events(raw_xml, ns)
-
+xml_log = process_events(raw_xml, configuration, ns)
+print(xml_log)
 def link_atomic_runs(at_runs, events):
     results = []
 
