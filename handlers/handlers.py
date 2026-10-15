@@ -1,11 +1,15 @@
-from tabnanny import check
 import uuid
 import json
 from datetime import datetime
+import sys
+from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
+from rule_condition.collect_references import collect_references
+from rule_condition.condition_operand_parsers import parse_condition
+from rule_condition.preper import prepare_condition, evaluate_conditions
 from load_file import load_xml_file, load_csv_file, load_sigma_rule, load_sources_confsg
-
-#Proof of concept. Модель загроз. Обшрунтування вибору Python
 
 xml_file = "/home/ash/Проекти/dvp/events.xml"
 art_log = "/home/ash/Проекти/dvp/log.csv"
@@ -218,13 +222,16 @@ def event_message_handler(event, matches):
 
     return evt_reason
 
-def selection_message_handler(selection, failed):
+def selection_message_handler(selection, failed=None):
+    failed = failed or []
+
     if selection is None:
         sel_reason = "Selection was not evaluated because the logsource does not match the rule requirements"
     elif selection is True:
         sel_reason = "All selection checks matched"
     else:
-        sel_reason = "Selection did not match. Failed checks:" + ", ".join(failed)
+        failed_summary = ", ".join(failed) if failed else "none"
+        sel_reason = "Selection did not match. Failed checks:" + failed_summary
 
     return sel_reason
 
@@ -375,11 +382,20 @@ def build_rule_report(rule, event_results):
 brilded_rule = build_rule_report(sigma_rule, results)
 formatted_results = json.dumps(brilded_rule, ensure_ascii=False, indent=4)
 
-print(formatted_results)
+#print(formatted_results)
 
 def save_report (report):
     with open("report-library.json", "w", encoding="utf-8") as file:
         file.write(report)
 
 #save_report(formatted_results)
+detection = sigma_rule["detection"]
 
+#tree = prepare_condition(detection, parse_condition, collect_references)
+block_results = {
+    "selection_process": True,
+    "filter_user": False
+}
+
+tree = parse_condition("filter_user")
+print(evaluate_conditions(tree, block_results))
