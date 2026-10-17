@@ -72,3 +72,39 @@ def parse_condition(conditions):
         raise ValueError(f"Unexpected token: {tokens[position]!r}")
 
     return node
+
+def explain_condition(node, block_results):
+    if node["type"] == "reference":
+        return {
+            "Type" : "reference",
+            "Name" : node["name"],
+            "Result" : block_results[node["name"]]
+        }
+
+    if node["type"] == "not":
+        operand = explain_condition(node["operand"], block_results)
+        return {
+            "Type" : "not",
+            "Operand" : operand,
+            "Result" : not operand["Result"]
+        }
+
+    if node["type"] in ("and", "or"):
+        left = explain_condition(node["left"], block_results)
+        right = explain_condition(node["right"], block_results)
+
+        if node["type"] == "and":
+            result = left["Result"] and right["Result"]
+        else:
+            result = left["Result"] or right["Result"]
+
+        return {
+            "Type" : node["type"],
+            "Left" : left,
+            "Right" : right,
+            "Result" : result
+        }
+
+    raise ValueError(f"Unknown node type: {node['type']!r}")
+        
+

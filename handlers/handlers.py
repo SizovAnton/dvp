@@ -7,8 +7,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from rule_condition.collect_references import collect_references
-from rule_condition.condition_operand_parsers import parse_condition
-from rule_condition.preper import prepare_condition, evaluate_conditions
+from rule_condition.condition_operand_parsers import parse_condition, explain_condition
+from rule_condition.prepere import prepare_condition, evaluate_condition
 from load_file import load_xml_file, load_csv_file, load_sigma_rule, load_sources_confsg
 
 xml_file = "/home/ash/Проекти/dvp/events.xml"
@@ -94,9 +94,6 @@ def link_atomic_runs(at_runs, events):
             recived_at = datetime.fromisoformat(data["system_time"]
                     .replace("Z", "+00:00"))
             
-            #if data["event_id"] != "1":
-                #continue
-
             syslog_host = data["computer"]
             syslog_id = data["data_fields"].get("ParentProcessId")
             win_host = syslog_host.split('.', 1)[0].casefold()
@@ -235,84 +232,120 @@ def selection_message_handler(selection, failed=None):
 
     return sel_reason
 
+def evaluate_blocks(block_definition, item):
+    field_checks = {}
+
+    for rule_key, expected in block_definition.items():
+        parts = rule_key.split("|")
+        field = parts[0]
+        modifiers = parts[1:]
+
+        if field == "EventID":
+            actual = item.get("event_id")
+            field_present = "event_id" in item
+        else:
+            actual = item["data_fields"].get(field)
+            field_present = field in item["data_fields"]
+
+        expected_values = expected if isinstance(expected, list) else [expected]
+        value_checks = []
+
+        for value in expected_values:
+            if not modifiers:
+                value_matched = match_equals(actual, value)
+            elif modifiers == ["endswith"]:
+                value_matched = match_endswith(actual, value)
+            elif modifiers == ["contains"]:
+                value_matched = (actual is not None and 
+                                    value.casefold() in actual.casefold())
+            else:
+                raise ValueError(f"Unsupported modifiers: {modifiers!r}")
+
+            value_checks.append(value_matched)
+
+        matched = any(value_checks)
+
+        if not field_present:
+            reason = "Required field is missing form the event."
+        elif field_present == matched:
+            reason = "The field matched at least one expected value."
+        else:
+            reason = "The field did not match any expected value."
+
+        field_checks[rule_key] = {
+            "Field" : field,
+            "Actual" : actual,
+            "Expected" : expected,
+            "Modifiers" : modifiers,
+            "Field Present" : field_present,
+            "Matched" : matched,
+            "Value Checks" : [
+                {"Expected" : value, "Matched" : result} 
+                for value, result in zip(expected_values, value_checks)
+            ],
+            "Reason" : reason
+        }
+
+    block_matched = all(
+        check["Matched"] for check in field_checks.values()
+    )
+
+    return field_checks, block_matched
+
 def report_handler(items):
     results = []
 
-    for evt, img, cl, miss, item in items:
+    detection = sigma_rule["detection"]
+    tree = prepare_condition(detection, parse_condition, collect_references)
+    references = collect_references(tree)
+
+    
+    for _, _, _, _, item in items:
+       
         source_result = check_logsource(sigma_rule, item)
         source_check = source_result[0]
-
         selection = None
-        checks = {}
-        sufix_checks = []
+        condition_explanation = None
+
+        block_checks = {}
+        block_results = {}
 
         if source_check["Status"] == True:
-            matched_evt = match_equals(evt, match["EventID"])
+            for block_name in sorted(references):
+                field_checks, block_matched = evaluate_blocks(
+                    detection[block_name], item
+                )
             
-            for k in match["Image"]:
-                matched_img = match_endswith(img, k)
-                sufix_checks.append(matched_img)
-                    
-            img_matches = any(sufix_checks)
+                block_checks[block_name] = field_checks
+                block_results[block_name] = block_matched
 
-            rule_cl = match["CommandLine"]
-            cl_val = cl or ""
-        
-            checks_cl = [r.casefold() in cl_val.casefold() 
-                 for r in rule_cl]
-    
-            cl_matches = any(checks_cl)
+            selection = evaluate_condition(tree, block_results)
+            condition_explanation = explain_condition(tree, block_results)           
 
-            image_reason = image_message_handler(img, img_matches)
-            cl_reason = commandline_message_handler(cl, cl_matches)
-            evt_reason = event_message_handler(evt, matched_evt)
+        if selection is None:
+            selection_reason = (
+        "Condition was not evaluated because the logsource "
+        "does not match the rule requirements."
+    )
+        elif selection:
+            selection_reason = "The rule condition evaluated to True."
+        else:
+            selection_reason = "The rule condition evaluated to False."
 
-            checks = {
-                "Image Match": {
-                    "Actual" : img,
-                    "Expected" : match["Image"],
-                    "Operation" : "endswith",
-                    "Field Present" : img is not None,
-                    "Matched" : img_matches,
-                    "Reason" : image_reason
-                },
-                "Command Line Match":{
-                    "Actual" : cl,
-                    "Expected" : rule_cl,
-                    "Operation" : "contains",
-                    "Field Present" : cl is not None,
-                    "Matched" : cl_matches,
-                    "Reason" : cl_reason
-                },
-                "Event Match": {
-                    "Actual" : evt,
-                    "Expected" : match["EventID"],
-                    "Operation" : "equals",
-                    "Field Present" : evt is not None,
-                    "Matched" : matched_evt,
-                    "Reason" : evt_reason
-                }
-            }
+        values = {}
 
-            selection = matched_evt and img_matches and cl_matches
-
-        failed_checks = []
-
-        for check_name, check_result in checks.items():
-            if check_result["Matched"] is False:
-                failed_checks.append(check_name)
-
-        selection_reason = selection_message_handler(selection, failed_checks)
+        for field_checks in block_checks.values():
+            for check in field_checks.values():
+                values[check["Field"]] = check["Actual"]
 
         res = {
             "Log Record ID" : item["record_id"],
             "Logsource" : source_check,
-            "Values": {
-                "Event ID": evt,
-                "Image": img,
-                "CommandLine": cl
-            },
-            "Checks": checks,
+            "Values": values,
+            "Condition" : detection["condition"],
+            "Condition Explanation" : condition_explanation,
+            "Block Results" : block_results,
+            "Checks" : block_checks,
             "Selection Reason" : selection_reason,
             "Selection": selection
         }
@@ -323,7 +356,7 @@ def report_handler(items):
 
 items = get_items()
 results = report_handler(items)
-
+report_handler(items)
 total_count = len(results)
 total_selections = [result for result in results 
                     if result["Selection"]]
@@ -379,23 +412,14 @@ def build_rule_report(rule, event_results):
 
     return report
 
-brilded_rule = build_rule_report(sigma_rule, results)
-formatted_results = json.dumps(brilded_rule, ensure_ascii=False, indent=4)
+builded_rule = build_rule_report(sigma_rule, results)
+formatted_results = json.dumps(builded_rule, ensure_ascii=False, indent=4)
 
-#print(formatted_results)
+print(formatted_results)
 
 def save_report (report):
     with open("report-library.json", "w", encoding="utf-8") as file:
         file.write(report)
 
 #save_report(formatted_results)
-detection = sigma_rule["detection"]
 
-#tree = prepare_condition(detection, parse_condition, collect_references)
-block_results = {
-    "selection_process": True,
-    "filter_user": False
-}
-
-tree = parse_condition("filter_user")
-print(evaluate_conditions(tree, block_results))
