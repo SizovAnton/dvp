@@ -1,6 +1,6 @@
 import uuid
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
@@ -8,8 +8,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from rule_condition.collect_references import collect_references
 from rule_condition.condition_operand_parsers import parse_condition, explain_condition
-from rule_condition.prepere import prepare_condition, evaluate_condition
+from rule_condition.prepare import prepare_condition, evaluate_condition
 from load_file import load_xml_file, load_csv_file, load_sigma_rule, load_sources_confsg
+from displaying.table import build_report_view
 
 xml_file = "/home/ash/Проекти/dvp/events.xml"
 art_log = "/home/ash/Проекти/dvp/log.csv"
@@ -31,7 +32,7 @@ def config_handler(channel, provider, config):
         
     return config["defaults"]["windows_event_log"]
 
-def process_events(xml, config, ns=ns, id=id):
+def process_events(xml, config, ns=ns):
     events_results = []
 
     for event in xml:
@@ -292,6 +293,60 @@ def evaluate_blocks(block_definition, item):
 
     return field_checks, block_matched
 
+def parse_event_time(value):
+    if value is None or value == "" or value == "Unknown":
+        return None
+
+    try:
+        parsed = datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        )
+    except ValueError:
+        return None
+
+    if parsed.tzinfo is None:
+        return None
+    else:
+        return parsed.astimezone(timezone.utc)
+
+def build_time_summary(ref):
+    valid_times = []
+    unavailable_count = 0
+
+    for r in ref:
+        parsed = parse_event_time(r["Time Created"])
+
+        if parsed is None:
+            unavailable_count +=1
+        else:
+            valid_times.append(parsed)
+
+    first_seen = min(valid_times) if valid_times else None
+    last_seen = max(valid_times) if valid_times else None
+
+    return {
+        "First Seen" : first_seen.isoformat() if first_seen is not None else None,
+        "Last Seen" : last_seen.isoformat() if last_seen is not None else None,
+        "Valid Time" : len(valid_times),
+        "Unavailable Timestamps" : unavailable_count
+    }
+
+def explain_field_check(check):
+    if check["Field Present"] is False:
+        status = "FIELD MISSING"
+    elif check["Matched"] is True:
+        status = "MATCH"
+    else:
+        status = "NO MATCH"
+
+    return {
+        "Field" : check["Field"],
+        "Modifiers" : check["Modifiers"],
+        "Expected" : check["Expected"],
+        "Actual" : check["Actual"],
+        "Status" : status
+    }
+
 def report_handler(items):
     results = []
 
@@ -299,7 +354,6 @@ def report_handler(items):
     tree = prepare_condition(detection, parse_condition, collect_references)
     references = collect_references(tree)
 
-    
     for _, _, _, _, item in items:
        
         source_result = check_logsource(sigma_rule, item)
@@ -341,6 +395,12 @@ def report_handler(items):
         res = {
             "Log Record ID" : item["record_id"],
             "Logsource" : source_check,
+            "Event Context" : {
+                "Computer" : item["computer"],
+                "Channel" : item["channel"],
+                "Provider" : item["provider"],
+            },
+            "Time Created" : item["system_time"],
             "Values": values,
             "Condition" : detection["condition"],
             "Condition Explanation" : condition_explanation,
@@ -364,15 +424,102 @@ total_selection_count = len(total_selections)
 
 rejected = [res for res in results if not res["Selection"]]
 
+def build_evidence_key(result):
+    evidence = {
+        "Logsource" : result["Logsource"],
+        "Event Context" : result["Event Context"],
+        "Values" : result["Values"],
+        "Condition" : result["Condition"],
+        "Condition Explanation" : result["Condition Explanation"],
+        "Block Results" : result["Block Results"],
+        "Checks" : result["Checks"],
+        "Selection" : result["Selection"],
+        "Selection Reason" : result["Selection Reason"]
+    }
+
+    return json.dumps(evidence, sort_keys=True, ensure_ascii=False)
+
+def group_event_results(event_results):
+    groups = {}
+
+    for result in event_results:
+        key = build_evidence_key(result)
+
+        if key not in groups:
+            groups[key] = {
+                "Evidence" : json.loads(key),
+                "Count" : 0,
+                "References" : []
+            }
+
+        groups[key]["Count"] += 1
+        groups[key]["References"].append({
+            "Event Reference" : result["Event Reference"],
+            "Log Record ID" : result["Log Record ID"],
+            "Time Created" : result["Time Created"]
+        })
+
+    return list(groups.values())
+
+def build_report_conclusion(report):
+    summary = report["Events Summary"]
+
+    total = summary["Total Events"]
+    matched = summary["Match"]
+    unmatched = summary["Unmatch"]
+    skipped = summary["Skipped"]
+    evaluated = matched + unmatched
+
+    if total == 0:
+        conclusion = "No events were provided for rule evaluation"
+    elif evaluated == 0:
+        conclusion = f"All {skipped} events were skipped; the rule condition was not evaluated."
+    elif matched > 0:
+        conclusion = f"The rule condition matched {matched} of {evaluated} evaluated events."
+    else:
+        conclusion = f"The rule condition did not match any of the {evaluated} evaluated events."
+
+    if evaluated > 0 and skipped >0:
+        conclusion += f" Additionally, {skipped} of {total} input events were skipped; " "the rule condition was not evaluated for those events."
+    
+    return conclusion 
+
+def build_checks_explanation(checks):
+    explanation = {}
+
+    for block_name, field_checks in checks.items():
+        explanation[block_name] = {}
+        for check_name, check in field_checks.items():
+            explanation[block_name][check_name] = explain_field_check(check)
+
+    return explanation
+
 def build_rule_report(rule, event_results):
     report_id = str(uuid.uuid4())
     report_events = []
 
     for number, result in enumerate(event_results, start=1):
         report_event = {
-            "Event Reference" : f"{report_id}-{number}", **result
+            **result,
+            "Event Reference" : f"{report_id}-{number}"
         }
         report_events.append(report_event)
+
+    grouped_events = group_event_results(report_events)
+
+    for number, group in enumerate(grouped_events, start=1):
+        group["Group Reference"] = f"{report_id}-G{number}"
+        group["Time Summary"] = build_time_summary(group["References"])
+
+    matched_groups = [
+        group for group in grouped_events 
+        if group["Evidence"]["Selection"] is True]
+    unmatched_groups = [
+        group for group in grouped_events 
+        if group["Evidence"]["Selection"] is False]
+    skipped_groups = [
+        group for group in grouped_events
+        if group["Evidence"]["Selection"] is None]
 
     matched_events = [
         result for result in report_events if result["Selection"] is True
@@ -402,24 +549,118 @@ def build_rule_report(rule, event_results):
             "Detection" : rule.get("detection")
             },
         "Event Review" : {
-            "Match" : matched_events,
-            "Unmatch" : unmatched_events
+            "Match" : matched_groups,
+            "Unmatch" : unmatched_groups
         }
     }
 
-    if skipped_events:
-        report["Event Review"]["Skipped"] = skipped_events
+    if skipped_groups:
+        report["Event Review"]["Skipped"] = skipped_groups
+
+    report["Conclusion"] = build_report_conclusion(report)
 
     return report
 
 builded_rule = build_rule_report(sigma_rule, results)
+#print(builded_rule)
+
 formatted_results = json.dumps(builded_rule, ensure_ascii=False, indent=4)
 
-print(formatted_results)
+#print(formatted_results)
+
+def format_condition_explanation(node):
+    if node["Type"] == "reference":
+        name = node["Name"]
+        result = node["Result"]
+
+        return f"{name}={result}"
+
+    if node["Type"] == "not":
+        operand = format_condition_explanation(node["Operand"])
+
+        return f"NOT ({operand}) => {node['Result']}"
+
+    if node["Type"] in ("and", "or"):
+        left = format_condition_explanation(node["Left"])
+        right = format_condition_explanation(node["Right"])
+        operator = node["Type"].upper()
+
+        return f"({left}) {operator} ({right}) => {node['Result']}"
+
+    raise ValueError(f"Unknown explanation type: {node['Type']!r}")
+
+def print_group_review(group):
+    evidence = group["Evidence"]
+
+    print(f"Group: {group['Group Reference']}")
+    print(f"Events: {group['Count']}")
+
+    context = evidence["Event Context"]
+    time_summary = group["Time Summary"]
+
+    print(f"Host: {context['Computer']}")
+    print(f"Channel: {context['Channel']}")
+    print(f"Provider: {context['Provider']}")
+
+    first_seen = time_summary["First Seen"] or "Unavailable"
+    last_seen = time_summary["Last Seen"] or "Unavailable"
+
+    print(f"First Seen (UTC): {first_seen}")
+    print(f"Last Seen (UTC): {last_seen}")
+    print(
+        f"Timestamps: {time_summary['Valid Time']} valid, "
+        f"{time_summary['Unavailable Timestamps']} unavailable"
+    )
+
+    condition = evidence["Condition Explanation"]
+
+    if condition is None:
+        print(f"Condition not evalated: {evidence['Selection Reason']}")
+    else:
+        print(f"Condition: {format_condition_explanation(condition)}")
+
+    checks = build_checks_explanation(evidence["Checks"])
+
+    for block_name, field_checks in checks.items():
+        print(f"Block: {block_name}")
+        for check_name, detail in field_checks.items():
+            print(f" {check_name}: {detail['Status']}")
+            print(f"    Expected: {detail['Expected']!r}")
+            print(f"    Actual: {detail['Actual']!r}")
+
+    references = group["References"]
+    reference_limit = 2
+
+    print("Event references:")
+
+    for reference in references[:reference_limit]:
+        print(f"  Event: {reference['Event Reference']}")
+        print(f"    Record: {reference['Log Record ID']}")
+        print(f"    Time: {reference['Time Created']}")
+
+    remaining = len(references) - reference_limit
+
+    if remaining > 0:
+        print(f"  Additional references retained in report data: {remaining}")
+
+from rich.console import Console
+
+
+
+console = Console()
+console.print(build_report_view(builded_rule))
+
+
+
+
+
+
 
 def save_report (report):
     with open("report-library.json", "w", encoding="utf-8") as file:
         file.write(report)
 
 #save_report(formatted_results)
+
+
 
