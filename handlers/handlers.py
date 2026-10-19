@@ -4,33 +4,43 @@ from datetime import datetime, timezone
 import sys
 from pathlib import Path
 
+from rich.console import Console, Group
+from rich.text import Text
+from rich.table import Table
+
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from rule_condition.collect_references import collect_references
 from rule_condition.condition_operand_parsers import parse_condition, explain_condition
 from rule_condition.prepare import prepare_condition, evaluate_condition
 from load_file import load_xml_file, load_csv_file, load_sigma_rule, load_sources_confsg
-from displaying.table import build_report_view
+from displaying.table import add_checks_rows, build_report_metadata_view
 
 xml_file = "/home/ash/Проекти/dvp/events.xml"
 art_log = "/home/ash/Проекти/dvp/log.csv"
-yaml_rule = "/home/ash/Проекти/dvp/test_rule.yaml"
+yaml_rule = "/home/ash/Проекти/dvp/test3_rule.yaml"
 ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
-config_file = "/home/ash/Проекти/dvp/config/source.json"
+config_file = "/home/ash/Проекти/dvp/config/config.json"
 
 raw_xml = load_xml_file(xml_file)
 atomic_log = load_csv_file(art_log)
 configuration = load_sources_confsg(config_file)
 sigma_rule = load_sigma_rule(yaml_rule)
 
-def config_handler(channel, provider, config):
+def config_handler(channel, provider, config) -> dict:
     
     for source in config["sources"]:
         if source["channel"] == channel and source["provider"] == provider:
             
             return source
+
+    defaults = config["defaults"]["windows_event_log"]
         
-    return config["defaults"]["windows_event_log"]
+    return {
+        ** defaults,
+        "channel" : channel,
+        "provider" : provider
+    }
 
 def process_events(xml, config, ns=ns):
     events_results = []
@@ -46,7 +56,7 @@ def process_events(xml, config, ns=ns):
             provider = "Unknown"
 
         source_description = config_handler(channel, provider, config)
-
+        
         event_id = event.findtext('ns:System/ns:EventID', default="Unknown", namespaces=ns,)
         computer = event.findtext('ns:System/ns:Computer', default="Unknown", namespaces=ns,)
         time_created = event.find('ns:System/ns:TimeCreated', namespaces=ns)
@@ -79,30 +89,29 @@ def process_events(xml, config, ns=ns):
 
 xml_log = process_events(raw_xml, configuration, ns)
 
-def link_atomic_runs(at_runs, events):
+def link_atomic_runs(at_runs, events, correlation_config):
     results = []
+    time_window = correlation_config["time_window_seconds"]
 
     for at_run in at_runs:
         match = []
 
         atomic_host = at_run["Hostname"].split('.', 1)[0].casefold()
-        atomic_pid = at_run["ProcessId"]
 
         sent_at = datetime.fromisoformat(at_run["Execution Time (UTC)"]
                             .replace("Z", "+00:00"))
         
         for data in events:
-            recived_at = datetime.fromisoformat(data["system_time"]
+            received_at = datetime.fromisoformat(data["system_time"]
                     .replace("Z", "+00:00"))
             
             syslog_host = data["computer"]
-            syslog_id = data["data_fields"].get("ParentProcessId")
             win_host = syslog_host.split('.', 1)[0].casefold()
         
-            if win_host == atomic_host and syslog_id == atomic_pid:
-                delay = (recived_at - sent_at).total_seconds()
+            if win_host == atomic_host:
+                delay = (received_at - sent_at).total_seconds()
 
-                if 0 <= delay <= 5:
+                if 0 <= delay <= time_window:
                     match.append(data)
 
         results.append({
@@ -111,7 +120,14 @@ def link_atomic_runs(at_runs, events):
         })
     return results
 
-linked_runs = link_atomic_runs(atomic_log, xml_log)
+linked_runs = link_atomic_runs(
+    atomic_log,
+    xml_log,
+    configuration["correlation"]
+)
+
+
+#linked_runs = link_atomic_runs(atomic_log, xml_log, configuration["correlation"])
 
 def yaml_handling(rules):
     items = rules["detection"]["selection"]
@@ -129,7 +145,7 @@ def yaml_handling(rules):
     
     return splitted_items
     
-rule = yaml_handling(sigma_rule)
+#rule = yaml_handling(sigma_rule)
 
 def get_event_value(event: dict, field: str) -> str | None:
     if field == "EventID":
@@ -141,12 +157,8 @@ def get_items():
     for run_result in linked_runs:
         
         for event in run_result["candidate_events"]:
-            eventid = get_event_value(event, "EventID")
-            image = get_event_value(event, "Image")
-            command_line = get_event_value(event, "CommandLine")
-            missins = get_event_value(event, "MissingField")
            
-            yield eventid, image, command_line, missins, event        
+            yield event        
        
 def match_equals (actual: str | None, expected: str | int) -> bool:
     if actual is None:
@@ -162,7 +174,7 @@ def match_handler(income_list):
 
     return get_values
 
-match = match_handler(rule)
+#match = match_handler(rule)
 
 def match_endswith(actual: str | None, expected: str) -> bool:
     if actual is None:
@@ -340,10 +352,7 @@ def explain_field_check(check):
         status = "NO MATCH"
 
     return {
-        "Field" : check["Field"],
-        "Modifiers" : check["Modifiers"],
-        "Expected" : check["Expected"],
-        "Actual" : check["Actual"],
+        **check,
         "Status" : status
     }
 
@@ -354,7 +363,7 @@ def report_handler(items):
     tree = prepare_condition(detection, parse_condition, collect_references)
     references = collect_references(tree)
 
-    for _, _, _, _, item in items:
+    for item in items:
        
         source_result = check_logsource(sigma_rule, item)
         source_check = source_result[0]
@@ -643,24 +652,71 @@ def print_group_review(group):
     if remaining > 0:
         print(f"  Additional references retained in report data: {remaining}")
 
-from rich.console import Console
-
-
+def format_detail_value(value, indent=0):
+    if isinstance(value, dict):
+        for val in value.items():
+            print(val)
+    elif isinstance(value.items(), list):
+        for val in value:
+            print(val)
+    else:
+        print(repr(value)," " * indent)
 
 console = Console()
-console.print(build_report_view(builded_rule))
+
+def build_event_review_view(rule):
+    sections = []
+
+    summary_table = Table(title="Evidence Group", show_lines=True)
+    summary_table.add_column("Group")
+    summary_table.add_column("Result")
+    summary_table.add_column("Events")
+    summary_table.add_column("Reason")
+
+    table = Table(title="Evidence", show_lines=True)
+    table.add_column("Group")
+    table.add_column("Check")
+    table.add_column("Details")
+    
+    for category, groups in rule["Event Review"].items():
+        for group in groups:
+            group_label = group["Group Reference"].rsplit("-", 1)[-1]
+            evidence = group["Evidence"]
+            raw_checks = evidence["Checks"]
+            summary_table.add_row(Text(group_label), Text(category), Text(str(group["Count"])), Text(str(evidence["Selection Reason"])))
+
+            if raw_checks:
+            
+                checks = build_checks_explanation(raw_checks)
+                add_checks_rows(table, checks, group_label) 
+
+            else:
+                source_checks = evidence["Logsource"]["Checks"]
+
+                if source_checks:
+                    add_checks_rows(table, {
+                        "logsource" : source_checks
+                    }, group_label)
+
+    sections.append(summary_table)
+    sections.append(Text(""))
+    sections.append(table)
+
+    return Group(*sections)
+
+view = build_event_review_view(builded_rule)
+#console.print(view)
+        
+
+#def save_report (report):
+    #with open("report-library.json", "w", encoding="utf-8") as file:
+        #file.write(report)
+
+#save_report(view)
 
 
+metadata_view = build_report_metadata_view(builded_rule)
+evidence_view = build_event_review_view(builded_rule)
 
-
-
-
-
-def save_report (report):
-    with open("report-library.json", "w", encoding="utf-8") as file:
-        file.write(report)
-
-#save_report(formatted_results)
-
-
-
+view = Group(metadata_view, evidence_view)
+console.print(view)

@@ -1,0 +1,20 @@
+title: Test - Cmdkey Credential Listing
+id: 4c17c0a9-85a6-4e9b-9e5f-2f104483fabe
+status: experimental
+description: Тестове правило для перевірки обчислення результатів і відображення доказів.
+author: DVP
+date: 2026/10/19
+
+logsource:
+  product: windows
+  service: sysmon
+
+detection:
+  selection_process:
+    EventID: 1
+    Image|endswith: '\cmdkey.exe'
+    CommandLine|contains: '/list'
+
+  condition: selection_process
+
+level: informational

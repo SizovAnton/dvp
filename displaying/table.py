@@ -3,55 +3,45 @@ from rich.text import Text
 from rich.console import Console, Group
 from rich.panel import Panel
 
-def build_checks_table(checks):
-    table = Table(title="Field Checks", show_lines=True)
+def format_check_details(detail):
+    rows = []
 
-    table.add_column("Check")
-    table.add_column("Expected")
-    table.add_column("Actual")
-    table.add_column("Result")
+    for key, value in detail.items():
+        rows.append(f"{key}: {value!r}")
 
-    status_styles = {
-        "MATCH" : "cyan",
-        "NO MATCH" : "yellow",
-        "FIELD MISSING" : "bold magenta"
-    }
+    text = "\n".join(rows)
+    return text
 
+def add_checks_rows(table, checks, group_reference):
     for block_name, field_checks in checks.items():
         for check_name, detail in field_checks.items():
-            status = detail["Status"]
-            style = status_styles.get(status, "white")
+            details = format_check_details(detail)
 
             table.add_row(
+                Text(str(group_reference)),
                 Text(f"{block_name}\n{check_name}"),
-                Text(repr(detail["Expected"])),
-                Text(repr(detail["Actual"])),
-                Text(status, style=style)
+                Text(details),
             )
-    return table
 
-def build_report_view(report):
-    rule = report["Rule"]
-    summary = report["Events Summary"]
+def build_report_metadata_view(report):
     sections = []
 
-    sections.append(
-        Text(str(rule["Rule Title"]), style="bold")
-    )
-    sections.append(
-        Text(f"Report ID: {report['Report ID']}", style="dim")
-    )
+    for name, value in report.items():
+        if name == "Event Review":
+            continue
 
-    sections.append(
-        Text(
-            f"Events: {summary['Total Events']} | "
-            f"Matched: {summary['Match']} | "
-            f"Unmatched: {summary['Unmatch']} | "
-            f"Skipped: {summary['Skipped']} | "
-            f"Rule ID: {rule["Rule ID"]} | "
-            f"Rule Description: {rule["Rule Description"]} | "
-            f"Conclusion: {report["Conclusion"]}"
+        sections.append(
+            Text(name, style="bold")
         )
-    )
+
+        if isinstance(value, dict):
+            sections.append(
+                Text(format_check_details(value), style="dim"
+                ))
+        else:
+            sections.append(
+                Text(str(value)
+                ))
 
     return Group(*sections)
+

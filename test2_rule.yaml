@@ -1,0 +1,61 @@
+title: Suspicious Network Exfiltration via Windows Event Logs
+id: 9a8b7c6d-5e4f-3a2b-1c0d-e9f8a7b6c5d4
+status: experimental
+description: Detects potential data exfiltration or network tunneling using native Windows Event Logs (Windows Filtering Platform and Firewall events).
+references:
+  - https://attack.mitre.org/techniques/T1048/
+  - https://attack.mitre.org/techniques/T1572/
+author: Cyber Security Analyst
+date: 2026/10/19
+
+logsource:
+  product: windows
+  service: security
+
+detection:
+  selection_event_ids:
+    EventID:
+      - 5156 # WFP дозволив з'єднання
+      - 5158 # WFP дозволив локальний порт прив'язки
+
+  selection_dns_anomaly:
+    DestPort:
+      - 53
+      - 5353
+    Protocol:
+      - 6  # TCP
+      - 17 # UDP
+
+  filter_legitimate_dns:
+    DestAddress:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
+
+  selection_http_non_standard:
+    DestPort:
+      - 8080
+      - 8443
+      - 10443
+    Protocol: 6 # TCP
+
+  selection_process_context:
+    Application|endswith:
+      - '\cmd.exe'
+      - '\powershell.exe'
+      - '\wscript.exe'
+      - '\cscript.exe'
+      - '\certutil.exe'
+
+  condition: selection_event_ids and ((selection_dns_anomaly and not filter_legitimate_dns and selection_process_context) or (selection_http_non_standard and selection_process_context))
+
+falsepositives:
+  - Legitimate administrative tasks running scripts that require external internet access.
+
+level: high
+
+tags:
+  - attack.exfiltration
+  - attack.command_and_control
+  - attack.t1048
+  - attack.t1572

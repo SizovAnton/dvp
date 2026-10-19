@@ -1,0 +1,30 @@
+{
+  "defaults": {
+    "windows_event_log": {
+    "description": "Події Windows Event Log",
+    "product": "windows",
+    "service": null
+},
+    "unknown": "Невідоме джерело"
+  },
+
+  "correlation" : {
+    "time_window_seconds": 5
+},
+  "sources": [
+    {
+    "channel": "Microsoft-Windows-Sysmon/Operational",
+    "provider": "Microsoft-Windows-Sysmon",
+    "description": "Windows Sysmon",
+    "product": "windows",
+    "service": "sysmon"
+},
+{
+    "channel" : "Security",
+    "provider" : "Microsoft-Windows-Security-Auditing",
+    "description" : "Windows Security Auditing",
+    "product" : "windows",
+    "service" : "security"
+}
+]
+}
