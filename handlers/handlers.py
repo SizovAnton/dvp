@@ -14,11 +14,11 @@ from rule_condition.collect_references import collect_references
 from rule_condition.condition_operand_parsers import parse_condition, explain_condition
 from rule_condition.prepare import prepare_condition, evaluate_condition
 from load_file import load_xml_file, load_csv_file, load_sigma_rule, load_sources_confsg
-from displaying.table import add_checks_rows, build_report_metadata_view
+from displaying.table import add_checks_rows, build_report_metadata_view, format_check_details
 
 xml_file = "/home/ash/Проекти/dvp/events.xml"
 art_log = "/home/ash/Проекти/dvp/log.csv"
-yaml_rule = "/home/ash/Проекти/dvp/test3_rule.yaml"
+yaml_rule = "/home/ash/Проекти/dvp/test_rule.yaml"
 ns = {'ns': 'http://schemas.microsoft.com/win/2004/08/events/event'}
 config_file = "/home/ash/Проекти/dvp/config/config.json"
 
@@ -89,34 +89,78 @@ def process_events(xml, config, ns=ns):
 
 xml_log = process_events(raw_xml, configuration, ns)
 
+def parse_event_time(value):
+    if not isinstance(value, str):
+        return None
+    value = value.strip()
+    
+    if value is None or value == "" or value == "Unknown":
+        return None
+
+    try:
+        parsed = datetime.fromisoformat(
+            value.replace("Z", "+00:00")
+        )
+    except ValueError:
+        return None
+
+    if parsed.tzinfo is None:
+        return None
+    else:
+        return parsed.astimezone(timezone.utc)
+
 def link_atomic_runs(at_runs, events, correlation_config):
     results = []
     time_window = correlation_config["time_window_seconds"]
 
     for at_run in at_runs:
         match = []
+        correlation_issues = []
 
         atomic_host = at_run["Hostname"].split('.', 1)[0].casefold()
+        sent_at = parse_event_time(at_run.get("Execution Time (UTC)"))
 
-        sent_at = datetime.fromisoformat(at_run["Execution Time (UTC)"]
-                            .replace("Z", "+00:00"))
+        if sent_at is None:
+            correlation_issues.append({
+                "Execution Time (UTC)" : at_run.get("Execution Time (UTC)"),
+                "Reason" : "Run time is missing, invalid, or has no timezone."
+            })
+
+            results.append({
+                "atomic_run": at_run,
+                "candidate_events": match,
+                "correlation_issues": correlation_issues
+            })
+
+            continue
         
         for data in events:
-            received_at = datetime.fromisoformat(data["system_time"]
-                    .replace("Z", "+00:00"))
-            
             syslog_host = data["computer"]
-            win_host = syslog_host.split('.', 1)[0].casefold()
-        
-            if win_host == atomic_host:
-                delay = (received_at - sent_at).total_seconds()
+            win_host = syslog_host.split(".", 1)[0].casefold()
 
-                if 0 <= delay <= time_window:
-                    match.append(data)
+            if win_host != atomic_host:
+                continue
+
+            received_at = parse_event_time(data.get("system_time"))
+
+            if received_at is None:
+                correlation_issues.append({
+                    "Log Record ID" : data["record_id"],
+                    "Time Created" : data.get("system_time"),
+                    "Reason" : "Event time is missing, invalid, or has no timezone."
+                })
+                continue
+        
+
+            delay = (received_at - sent_at).total_seconds()
+
+            if 0 <= delay <= time_window:
+                match.append(data)
 
         results.append({
             "atomic_run": at_run,
             "candidate_events": match,
+            "correlation_issues" : correlation_issues
         })
     return results
 
@@ -125,9 +169,6 @@ linked_runs = link_atomic_runs(
     xml_log,
     configuration["correlation"]
 )
-
-
-#linked_runs = link_atomic_runs(atomic_log, xml_log, configuration["correlation"])
 
 def yaml_handling(rules):
     items = rules["detection"]["selection"]
@@ -145,8 +186,6 @@ def yaml_handling(rules):
     
     return splitted_items
     
-#rule = yaml_handling(sigma_rule)
-
 def get_event_value(event: dict, field: str) -> str | None:
     if field == "EventID":
         return event.get("event_id")
@@ -173,8 +212,6 @@ def match_handler(income_list):
     }
 
     return get_values
-
-#match = match_handler(rule)
 
 def match_endswith(actual: str | None, expected: str) -> bool:
     if actual is None:
@@ -304,22 +341,6 @@ def evaluate_blocks(block_definition, item):
     )
 
     return field_checks, block_matched
-
-def parse_event_time(value):
-    if value is None or value == "" or value == "Unknown":
-        return None
-
-    try:
-        parsed = datetime.fromisoformat(
-            value.replace("Z", "+00:00")
-        )
-    except ValueError:
-        return None
-
-    if parsed.tzinfo is None:
-        return None
-    else:
-        return parsed.astimezone(timezone.utc)
 
 def build_time_summary(ref):
     valid_times = []
@@ -503,7 +524,19 @@ def build_checks_explanation(checks):
 
     return explanation
 
-def build_rule_report(rule, event_results):
+def collect_correlation_issues(linked_runs):
+    collection = []
+
+    for run_results in linked_runs:
+        if run_results["correlation_issues"]:
+            collection.append({
+                "Atomic Run" : run_results["atomic_run"],
+                "Issues" : run_results["correlation_issues"]
+            })
+
+    return collection
+
+def build_rule_report(rule, event_results, linked_runs):
     report_id = str(uuid.uuid4())
     report_events = []
 
@@ -557,6 +590,7 @@ def build_rule_report(rule, event_results):
             "Logsource" : rule.get("logsource"),
             "Detection" : rule.get("detection")
             },
+        "Correlation Issues" : collect_correlation_issues(linked_runs),
         "Event Review" : {
             "Match" : matched_groups,
             "Unmatch" : unmatched_groups
@@ -570,12 +604,9 @@ def build_rule_report(rule, event_results):
 
     return report
 
-builded_rule = build_rule_report(sigma_rule, results)
-#print(builded_rule)
+builded_rule = build_rule_report(sigma_rule, results, linked_runs)
 
 formatted_results = json.dumps(builded_rule, ensure_ascii=False, indent=4)
-
-#print(formatted_results)
 
 def format_condition_explanation(node):
     if node["Type"] == "reference":
@@ -652,16 +683,6 @@ def print_group_review(group):
     if remaining > 0:
         print(f"  Additional references retained in report data: {remaining}")
 
-def format_detail_value(value, indent=0):
-    if isinstance(value, dict):
-        for val in value.items():
-            print(val)
-    elif isinstance(value.items(), list):
-        for val in value:
-            print(val)
-    else:
-        print(repr(value)," " * indent)
-
 console = Console()
 
 def build_event_review_view(rule):
@@ -671,6 +692,7 @@ def build_event_review_view(rule):
     summary_table.add_column("Group")
     summary_table.add_column("Result")
     summary_table.add_column("Events")
+    summary_table.add_column("Time UTC")
     summary_table.add_column("Reason")
 
     table = Table(title="Evidence", show_lines=True)
@@ -683,7 +705,9 @@ def build_event_review_view(rule):
             group_label = group["Group Reference"].rsplit("-", 1)[-1]
             evidence = group["Evidence"]
             raw_checks = evidence["Checks"]
-            summary_table.add_row(Text(group_label), Text(category), Text(str(group["Count"])), Text(str(evidence["Selection Reason"])))
+            time_details = format_check_details(group["Time Summary"])
+
+            summary_table.add_row(Text(group_label), Text(category), Text(str(group["Count"])), Text(time_details), Text(str(evidence["Selection Reason"])))
 
             if raw_checks:
             
@@ -704,19 +728,13 @@ def build_event_review_view(rule):
 
     return Group(*sections)
 
-view = build_event_review_view(builded_rule)
-#console.print(view)
-        
-
-#def save_report (report):
-    #with open("report-library.json", "w", encoding="utf-8") as file:
-        #file.write(report)
-
-#save_report(view)
-
-
 metadata_view = build_report_metadata_view(builded_rule)
 evidence_view = build_event_review_view(builded_rule)
 
 view = Group(metadata_view, evidence_view)
 console.print(view)
+
+
+
+
+
