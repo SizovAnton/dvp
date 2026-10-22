@@ -1,7 +1,8 @@
-from rich.table import Table
+# from rich.table import Table  # Таблиці створюються у displaying/reviw.py.
 from rich.text import Text
-from rich.console import Console, Group
-from rich.panel import Panel
+from rich.console import Group
+# from rich.console import Console  # Консоль створюється у main.py.
+# from rich.panel import Panel  # Не використовується у поточному відображенні.
 
 def format_check_details(detail):
     return "\n".join(format_detail_value(detail))
@@ -75,4 +76,3 @@ def format_detail_value(value, indent=0):
         return [prefix + repr(value)]
     
     return rows
-
