@@ -22,7 +22,7 @@ def build_report_metadata_view(report):
     sections = []
 
     for name, value in report.items():
-        if name == "Event Review":
+        if name in ("Event Review", "Check Summary"):
             continue
 
         sections.append(

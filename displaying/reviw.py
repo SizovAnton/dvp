@@ -1,11 +1,12 @@
 """Представлення результатів перевірки у таблицях Rich."""
 
+import enum
+
 from rich.console import Group
 from rich.table import Table
 from rich.text import Text
 
 from displaying.table import add_checks_rows, format_check_details
-
 
 def explain_field_check(check):
     if check["Field Present"] is False:
@@ -20,8 +21,6 @@ def explain_field_check(check):
         "Status" : status
     }
 
-
-
 def build_checks_explanation(checks):
     explanation = {}
 
@@ -32,87 +31,11 @@ def build_checks_explanation(checks):
 
     return explanation
 
-
-# Попереднє текстове відображення; поточний запуск використовує таблиці Rich.
-# def format_condition_explanation(node):
-#     if node["Type"] == "reference":
-#         name = node["Name"]
-#         result = node["Result"]
-#
-#         return f"{name}={result}"
-#
-#     if node["Type"] == "not":
-#         operand = format_condition_explanation(node["Operand"])
-#
-#         return f"NOT ({operand}) => {node['Result']}"
-#
-#     if node["Type"] in ("and", "or"):
-#         left = format_condition_explanation(node["Left"])
-#         right = format_condition_explanation(node["Right"])
-#         operator = node["Type"].upper()
-#
-#         return f"({left}) {operator} ({right}) => {node['Result']}"
-#
-#     raise ValueError(f"Unknown explanation type: {node['Type']!r}")
-
-# Попереднє текстове відображення; поточний запуск використовує таблиці Rich.
-# def print_group_review(group):
-#     evidence = group["Evidence"]
-#
-#     print(f"Group: {group['Group Reference']}")
-#     print(f"Events: {group['Count']}")
-#
-#     context = evidence["Event Context"]
-#     time_summary = group["Time Summary"]
-#
-#     print(f"Host: {context['Computer']}")
-#     print(f"Channel: {context['Channel']}")
-#     print(f"Provider: {context['Provider']}")
-#
-#     first_seen = time_summary["First Seen"] or "Unavailable"
-#     last_seen = time_summary["Last Seen"] or "Unavailable"
-#
-#     print(f"First Seen (UTC): {first_seen}")
-#     print(f"Last Seen (UTC): {last_seen}")
-#     print(
-#         f"Timestamps: {time_summary['Valid Time']} valid, "
-#         f"{time_summary['Unavailable Timestamps']} unavailable"
-#     )
-#
-#     condition = evidence["Condition Explanation"]
-#
-#     if condition is None:
-#         print(f"Condition not evalated: {evidence['Selection Reason']}")
-#     else:
-#         print(f"Condition: {format_condition_explanation(condition)}")
-#
-#     checks = build_checks_explanation(evidence["Checks"])
-#
-#     for block_name, field_checks in checks.items():
-#         print(f"Block: {block_name}")
-#         for check_name, detail in field_checks.items():
-#             print(f" {check_name}: {detail['Status']}")
-#             print(f"    Expected: {detail['Expected']!r}")
-#             print(f"    Actual: {detail['Actual']!r}")
-#
-#     references = group["References"]
-#     reference_limit = 2
-#
-#     print("Event references:")
-#
-#     for reference in references[:reference_limit]:
-#         print(f"  Event: {reference['Event Reference']}")
-#         print(f"    Record: {reference['Log Record ID']}")
-#         print(f"    Time: {reference['Time Created']}")
-#
-#     remaining = len(references) - reference_limit
-#
-#     if remaining > 0:
-#         print(f"  Additional references retained in report data: {remaining}")
-
-
-def build_event_review_view(rule):
+def build_event_review_view(rule, pattern_limit=10):
     sections = []
+    example_reference = set()
+    all_patterns = rule["Check Summary"]
+    visible_patterns = all_patterns[:pattern_limit]
 
     summary_table = Table(title="Evidence Group", show_lines=True)
     summary_table.add_column("Group")
@@ -126,8 +49,52 @@ def build_event_review_view(rule):
     table.add_column("Check")
     table.add_column("Details")
 
+    pattern_table = Table(title="Check Summary", show_lines=True)
+    pattern_table.add_column("Pattern")
+    pattern_table.add_column("Result")
+    pattern_table.add_column("Check")
+    pattern_table.add_column("Events")
+    pattern_table.add_column("Groups")
+    pattern_table.add_column("Examples")
+    pattern_table.add_column("Groups not shown")
+
+    for number, item in enumerate(visible_patterns, start=1):
+        selection = item["Pattern"]["Selection"]
+
+        if selection is True:
+            category = "Match"
+        elif selection is False:
+            category = "Unmatch"
+        else:
+            category = "Skipped"
+
+        example_labels = ", ".join(
+            reference.rsplit("-", 1)[-1] 
+            for reference in item["Example Groups"]
+        )
+
+        remaining_groups = (
+            item["Group Count"] - len(item["Example Groups"])
+        )
+
+        pattern_table.add_row(
+            f"P{number}",
+            category,
+            Text(format_pattern_checks(item["Pattern"])),
+            str(item["Count"]),
+            str(item["Group Count"]),
+            example_labels,
+            str(remaining_groups)
+        )
+
+    for item in visible_patterns:
+        example_reference.update(item["Example Groups"])
+
     for category, groups in rule["Event Review"].items():
         for group in groups:
+            if group["Group Reference"] not in example_reference:
+                continue
+
             group_label = group["Group Reference"].rsplit("-", 1)[-1]
             evidence = group["Evidence"]
             raw_checks = evidence["Checks"]
@@ -148,8 +115,43 @@ def build_event_review_view(rule):
                         "logsource" : source_checks
                     }, group_label)
 
+    sections.append(pattern_table)
+
+    hidden_patterns = all_patterns[pattern_limit:]
+    if hidden_patterns:
+        hidden_events = sum(item["Count"] for item in hidden_patterns)
+        sections.append(Text(
+            f"Additional patterns not shown: {len(hidden_patterns)}; "
+            f"events in those patterns: {hidden_events}. "
+            "Full details are retained in report data."
+        ))
+    sections.append(Text(""))
     sections.append(summary_table)
     sections.append(Text(""))
     sections.append(table)
 
     return Group(*sections)
+
+def format_pattern_checks(pattern):
+    rows = []
+
+    for block, result in pattern["Checks"].items():
+        for name, detail in result.items():
+            if detail["Field Present"] is False:
+                status = "FIELD MISSING"
+            elif detail["Matched"] is True:
+                status = "MATCH"
+            else:
+                status = "NO MATCH"
+
+            rows.append(f"{block}.{name}: {status}")
+
+    for check_name, source_detail in pattern["Logsource"]["Checks"].items():
+        if source_detail["Matched"] is True:
+            source_status = "MATCH"
+        else:
+            source_status = "NO MATCH"
+
+        rows.append(f"logsource.{check_name}: {source_status}")
+
+    return "\n".join(rows)

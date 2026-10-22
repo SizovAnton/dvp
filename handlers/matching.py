@@ -5,7 +5,6 @@ from rule_condition.collect_references import collect_references
 from rule_condition.condition_operand_parsers import parse_condition, explain_condition
 from rule_condition.prepare import prepare_condition, evaluate_condition
 
-
 def match_equals (actual: str | None, expected: str | int) -> bool:
     if actual is None:
         return False

@@ -27,7 +27,6 @@ def build_time_summary(ref):
         "Unavailable Timestamps" : unavailable_count
     }
 
-
 def build_evidence_key(result):
     evidence = {
         "Logsource" : result["Logsource"],
@@ -42,6 +41,57 @@ def build_evidence_key(result):
     }
 
     return json.dumps(evidence, sort_keys=True, ensure_ascii=False)
+
+def build_check_pattern_key(evidence):
+    results = {}
+
+    for block_name, field_checks in evidence["Checks"].items():
+        results[block_name] = {}
+        for check_name, detail in field_checks.items():
+            results[block_name][check_name] = {
+                "Field Present" : detail["Field Present"],
+                "Matched" : detail["Matched"]}
+
+    source_checks = {}
+
+    for check_src_name, detail_src in evidence["Logsource"]["Checks"].items():
+        source_checks[check_src_name] = {
+            "Matched" : detail_src["Matched"]
+        }
+            
+    pattern = {
+        "Selection" : evidence["Selection"],
+        "Block Results" : evidence["Block Results"],
+        "Checks" : results,
+        "Logsource" : {
+            "Status" : evidence["Logsource"]["Status"],
+            "Checks" : source_checks
+        }
+    }
+
+    return json.dumps(pattern, sort_keys=True, ensure_ascii=False)
+
+def summarize_check_patterns(grouped_events, example_limit=2):
+    patterns = {}
+
+    for group in grouped_events:
+        key = build_check_pattern_key(group["Evidence"])
+
+        if key not in patterns:
+            patterns[key] = {
+                "Pattern" : json.loads(key),
+                "Count" : 0,
+                "Group Count" : 0,
+                "Example Groups" : []
+            }
+
+        patterns[key]["Count"] += group["Count"]
+        patterns[key]["Group Count"] += 1
+
+        if len(patterns[key]["Example Groups"]) < example_limit:
+            patterns[key]["Example Groups"].append(group["Group Reference"])
+
+    return list(patterns.values())
 
 def group_event_results(event_results):
     groups = {}
@@ -88,7 +138,6 @@ def build_report_conclusion(report):
 
     return conclusion
 
-
 def collect_correlation_issues(linked_runs):
     collection = []
 
@@ -117,6 +166,8 @@ def build_rule_report(rule, event_results, linked_runs):
     for number, group in enumerate(grouped_events, start=1):
         group["Group Reference"] = f"{report_id}-G{number}"
         group["Time Summary"] = build_time_summary(group["References"])
+
+    check_summary = summarize_check_patterns(grouped_events)
 
     matched_groups = [
         group for group in grouped_events
@@ -159,7 +210,8 @@ def build_rule_report(rule, event_results, linked_runs):
         "Event Review" : {
             "Match" : matched_groups,
             "Unmatch" : unmatched_groups
-        }
+        },
+        "Check Summary" : check_summary
     }
 
     if skipped_groups:

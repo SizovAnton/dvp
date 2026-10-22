@@ -20,7 +20,6 @@ def config_handler(channel, provider, config) -> dict:
         "provider" : provider
     }
 
-
 def process_events(xml, config, ns=ns):
     events_results = []
 
