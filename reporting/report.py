@@ -82,11 +82,14 @@ def summarize_check_patterns(grouped_events, example_limit=2):
                 "Pattern" : json.loads(key),
                 "Count" : 0,
                 "Group Count" : 0,
-                "Example Groups" : []
+                "Example Groups" : [],
+                "Group References" : [],
+                "Pattern Reference" : f"P{len(patterns) + 1}"
             }
 
         patterns[key]["Count"] += group["Count"]
         patterns[key]["Group Count"] += 1
+        patterns[key]["Group References"].append(group["Group Reference"])
 
         if len(patterns[key]["Example Groups"]) < example_limit:
             patterns[key]["Example Groups"].append(group["Group Reference"])
@@ -220,3 +223,7 @@ def build_rule_report(rule, event_results, linked_runs):
     report["Conclusion"] = build_report_conclusion(report)
 
     return report
+
+def save_report_json(report, output_path):
+    with open(output_path, "w", encoding="utf-8") as file:
+        json.dump(report, file, ensure_ascii=False, indent=2)

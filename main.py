@@ -15,7 +15,7 @@ from handlers.load_file import (
     load_xml_file,
 )
 from handlers.matching import report_handler
-from reporting.report import build_rule_report
+from reporting.report import build_rule_report, save_report_json
 
 
 def main():
@@ -35,10 +35,25 @@ def main():
     event_results = report_handler(items, sigma_rule)
     report = build_rule_report(sigma_rule, event_results, linked_runs)
 
+    reports_dir = project_dir / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = reports_dir / f"{report["Report ID"]}.json"
+    save_report_json(report, output_path)
+
     metadata_view = build_report_metadata_view(report)
-    evidence_view = build_event_review_view(report)
+    #evidence_view = build_event_review_view(report)
+
+    evidence_view = build_event_review_view(
+    report
+)
+    output_path = reports_dir / f'{report["Report ID"]}.json'
+      
     console = Console()
     console.print(Group(metadata_view, evidence_view))
+    console.print(f"Report saved: {output_path}", markup=False)
+
+    
 
     return report
 

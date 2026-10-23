@@ -31,11 +31,29 @@ def build_checks_explanation(checks):
 
     return explanation
 
-def build_event_review_view(rule, pattern_limit=10):
+def find_check_pattern(patterns, pattern_reference):
+    for pattern in patterns:
+        if pattern["Pattern Reference"] == pattern_reference:
+            return pattern
+        
+    raise ValueError(f"Pattern not found: {pattern_reference}")
+
+def build_event_review_view(rule, pattern_limit=10, full_detail = False, pattern_reference=None):
     sections = []
-    example_reference = set()
+    visible_group_reference = set()
     all_patterns = rule["Check Summary"]
-    visible_patterns = all_patterns[:pattern_limit]
+
+    if pattern_reference is not None:
+        selected_pattern = find_check_pattern(all_patterns, pattern_reference)
+        visible_patterns = [selected_pattern]
+    elif full_detail:
+        visible_patterns = all_patterns
+    else:
+        visible_patterns = all_patterns[:pattern_limit]
+
+    show_all_groups = full_detail or pattern_reference is not None
+
+    
 
     summary_table = Table(title="Evidence Group", show_lines=True)
     summary_table.add_column("Group")
@@ -55,10 +73,10 @@ def build_event_review_view(rule, pattern_limit=10):
     pattern_table.add_column("Check")
     pattern_table.add_column("Events")
     pattern_table.add_column("Groups")
-    pattern_table.add_column("Examples")
+    pattern_table.add_column("Shown Groups")
     pattern_table.add_column("Groups not shown")
 
-    for number, item in enumerate(visible_patterns, start=1):
+    for item in visible_patterns:
         selection = item["Pattern"]["Selection"]
 
         if selection is True:
@@ -68,31 +86,42 @@ def build_event_review_view(rule, pattern_limit=10):
         else:
             category = "Skipped"
 
-        example_labels = ", ".join(
+        if show_all_groups:
+            shown_references = item["Group References"]
+        else:
+            shown_references = item["Example Groups"]
+
+        shown_labels = ", ".join(
             reference.rsplit("-", 1)[-1] 
-            for reference in item["Example Groups"]
+            for reference in shown_references
         )
 
-        remaining_groups = (
-            item["Group Count"] - len(item["Example Groups"])
-        )
+        if show_all_groups:
+            remaining_groups = 0
+        else:
+            remaining_groups = (
+                item["Group Count"] - len(shown_references)
+            )
 
         pattern_table.add_row(
-            f"P{number}",
+            item["Pattern Reference"],
             category,
             Text(format_pattern_checks(item["Pattern"])),
             str(item["Count"]),
             str(item["Group Count"]),
-            example_labels,
+            shown_labels,
             str(remaining_groups)
         )
 
     for item in visible_patterns:
-        example_reference.update(item["Example Groups"])
+        if show_all_groups:
+            visible_group_reference.update(item["Group References"])
+        else:
+            visible_group_reference.update(item["Example Groups"])
 
     for category, groups in rule["Event Review"].items():
         for group in groups:
-            if group["Group Reference"] not in example_reference:
+            if group["Group Reference"] not in visible_group_reference:
                 continue
 
             group_label = group["Group Reference"].rsplit("-", 1)[-1]
@@ -117,7 +146,11 @@ def build_event_review_view(rule, pattern_limit=10):
 
     sections.append(pattern_table)
 
-    hidden_patterns = all_patterns[pattern_limit:]
+    hidden_patterns = [
+        item for item in all_patterns
+        if item not in visible_patterns
+    ]
+
     if hidden_patterns:
         hidden_events = sum(item["Count"] for item in hidden_patterns)
         sections.append(Text(
