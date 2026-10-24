@@ -1,7 +1,5 @@
 """Представлення результатів перевірки у таблицях Rich."""
 
-import enum
-
 from rich.console import Group
 from rich.table import Table
 from rich.text import Text
@@ -188,3 +186,32 @@ def format_pattern_checks(pattern):
         rows.append(f"logsource.{check_name}: {source_status}")
 
     return "\n".join(rows)
+
+def build_atomic_runs_view(report):
+    table = Table(title="Atomic Runs", show_lines=True)
+
+    table.add_column("Run")
+    table.add_column("Test")
+    table.add_column("Time UTC")
+    table.add_column("Candidates")
+    table.add_column("Match")
+    table.add_column("Unmatch")
+    table.add_column("Skipped")
+    table.add_column("Issues")
+
+    for run in report["Atomic Runs"]:
+        atomic = run["Atomic Run"]
+        summary = run["Events Summary"]
+
+        table.add_row(
+            Text(run["Run Reference"]),
+            Text(str(atomic["Test Name"])),
+            str(atomic["Execution Time (UTC)"]),
+            str(run["Candidate Events"]),        
+            str(summary["Match"]),
+            str(summary["Unmatch"]),
+            str(summary["Skipped"]),
+            str(len(run["Correlation Issues"]))
+        )
+
+    return table

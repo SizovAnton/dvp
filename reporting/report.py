@@ -111,6 +111,7 @@ def group_event_results(event_results):
 
         groups[key]["Count"] += 1
         groups[key]["References"].append({
+            "Run Reference" : result["Run Reference"],
             "Event Reference" : result["Event Reference"],
             "Log Record ID" : result["Log Record ID"],
             "Time Created" : result["Time Created"]
@@ -170,6 +171,7 @@ def build_rule_report(rule, event_results, linked_runs):
         group["Group Reference"] = f"{report_id}-G{number}"
         group["Time Summary"] = build_time_summary(group["References"])
 
+    run_summaries = summaries_atomic_run(linked_runs, report_events)
     check_summary = summarize_check_patterns(grouped_events)
 
     matched_groups = [
@@ -214,7 +216,8 @@ def build_rule_report(rule, event_results, linked_runs):
             "Match" : matched_groups,
             "Unmatch" : unmatched_groups
         },
-        "Check Summary" : check_summary
+        "Check Summary" : check_summary,
+        "Atomic Runs" : run_summaries,
     }
 
     if skipped_groups:
@@ -227,3 +230,37 @@ def build_rule_report(rule, event_results, linked_runs):
 def save_report_json(report, output_path):
     with open(output_path, "w", encoding="utf-8") as file:
         json.dump(report, file, ensure_ascii=False, indent=2)
+
+def summaries_atomic_run(linked_runs, report_events):
+    summaries = {}
+
+    for run in linked_runs:
+        summaries[run["run_reference"]] = {
+        "Run Reference": run["run_reference"],
+        "Atomic Run": run["atomic_run"],
+        "Candidate Events": len(run["candidate_events"]),
+        "Events Summary": {
+            "Total Events": 0,
+            "Match": 0,
+            "Unmatch": 0,
+            "Skipped": 0,
+        },
+        "Event References": [],
+        "Correlation Issues": run["correlation_issues"],
+    }
+
+    for result in report_events:
+        run_summary = summaries[result["Run Reference"]]
+        run_summary["Events Summary"]["Total Events"] += 1
+
+        if result["Selection"] is True:
+            category = "Match"
+        elif result["Selection"] is False:
+            category = "Unmatch"
+        else:
+            category = "Skipped"
+
+        run_summary["Events Summary"][category] += 1
+        run_summary["Event References"].append(result["Event Reference"])
+
+    return list(summaries.values())

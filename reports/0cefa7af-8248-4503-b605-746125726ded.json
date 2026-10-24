@@ -1,0 +1,1623 @@
+{
+  "Report ID": "0cefa7af-8248-4503-b605-746125726ded",
+  "Events Summary": {
+    "Total Events": 20,
+    "Match": 12,
+    "Unmatch": 8,
+    "Skipped": 0
+  },
+  "Rule": {
+    "Rule ID": "5e638b9d-ec3b-468e-9080-60b64be1bc55",
+    "Rule Title": "Локальне перерахування облікових записів користувачів (net.exe)",
+    "Rule Description": "Виявляє спроби перерахування локальних облікових записів або членів груп за допомогою утиліти net.exe, що відповідає техніці MITRE ATT&CK T1087.001 (на основі тесту Atomic Red Team).",
+    "Logsource": {
+      "product": "windows",
+      "service": "sysmon"
+    },
+    "Detection": {
+      "selection": {
+        "EventID": 1,
+        "Image|endswith": [
+          "\\net.exe",
+          "\\net1.exe"
+        ],
+        "CommandLine|contains": [
+          " user",
+          " localgroup",
+          " group"
+        ]
+      },
+      "condition": "selection"
+    }
+  },
+  "Correlation Issues": [],
+  "Event Review": {
+    "Match": [
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": true
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "C:\\Windows\\system32\\net1  localgroup",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\net1.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": true
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": true,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": true,
+          "Selection Reason": "The rule condition evaluated to True.",
+          "Values": {
+            "CommandLine": "C:\\Windows\\system32\\net1  localgroup",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\net1.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-1",
+            "Log Record ID": "a0ee71e2-0f4c-46c2-a9d5-30b2efa2c60a",
+            "Time Created": "2026-10-02T20:26:05.716389600Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-11",
+            "Log Record ID": "b6276502-65de-4732-ae03-1e72ae002124",
+            "Time Created": "2026-10-02T20:27:53.798776700Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G1",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.716389+00:00",
+          "Last Seen": "2026-10-02T20:27:53.798776+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": true
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "net  localgroup",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\net.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": true,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": true,
+          "Selection Reason": "The rule condition evaluated to True.",
+          "Values": {
+            "CommandLine": "net  localgroup",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-2",
+            "Log Record ID": "7cd6b1fd-16ab-4684-bc6e-77ac7db8e55c",
+            "Time Created": "2026-10-02T20:26:05.711986700Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-12",
+            "Log Record ID": "f17e84e2-b1ad-4567-a041-e009ab8cc772",
+            "Time Created": "2026-10-02T20:27:53.793691500Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G2",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.711986+00:00",
+          "Last Seen": "2026-10-02T20:27:53.793691+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": true
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "C:\\Windows\\system32\\net1  localgroup \"Users\" ",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\net1.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": true
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": true,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": true,
+          "Selection Reason": "The rule condition evaluated to True.",
+          "Values": {
+            "CommandLine": "C:\\Windows\\system32\\net1  localgroup \"Users\" ",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\net1.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-3",
+            "Log Record ID": "ed160604-a7c8-4abf-8e43-5c43fed1f515",
+            "Time Created": "2026-10-02T20:26:05.702981600Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-13",
+            "Log Record ID": "d155d5fe-e53f-4f53-8e56-85ad18261b26",
+            "Time Created": "2026-10-02T20:27:53.782021700Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G3",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.702981+00:00",
+          "Last Seen": "2026-10-02T20:27:53.782021+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": true
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "net  localgroup \"Users\" ",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\net.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": true,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": true,
+          "Selection Reason": "The rule condition evaluated to True.",
+          "Values": {
+            "CommandLine": "net  localgroup \"Users\" ",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-4",
+            "Log Record ID": "fdd419a8-bde6-4bf8-abaf-223b1b0108c7",
+            "Time Created": "2026-10-02T20:26:05.698512300Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-14",
+            "Log Record ID": "8708d9b8-d0e4-4dae-9fc0-912bc4cfd801",
+            "Time Created": "2026-10-02T20:27:53.777671600Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G4",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.698512+00:00",
+          "Last Seen": "2026-10-02T20:27:53.777671+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": true
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "C:\\Windows\\system32\\net1  user ",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\net1.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": true
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": true,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": true,
+          "Selection Reason": "The rule condition evaluated to True.",
+          "Values": {
+            "CommandLine": "C:\\Windows\\system32\\net1  user ",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\net1.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-6",
+            "Log Record ID": "9e2698a4-62a2-4d6d-a32d-b4cc84aab934",
+            "Time Created": "2026-10-02T20:26:05.679590000Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-16",
+            "Log Record ID": "29153e9a-a89c-46d4-955a-f73d3503b3e0",
+            "Time Created": "2026-10-02T20:27:53.756895400Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G6",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.679590+00:00",
+          "Last Seen": "2026-10-02T20:27:53.756895+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": true
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "net  user ",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\net.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": true,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": true,
+          "Selection Reason": "The rule condition evaluated to True.",
+          "Values": {
+            "CommandLine": "net  user ",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\net.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-7",
+            "Log Record ID": "4af43643-d63c-438f-adf6-cc49a8454c86",
+            "Time Created": "2026-10-02T20:26:05.675205600Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-17",
+            "Log Record ID": "3b124823-b072-4887-9ce6-ffb4dd9f2bb0",
+            "Time Created": "2026-10-02T20:27:53.752425600Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G7",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.675205+00:00",
+          "Last Seen": "2026-10-02T20:27:53.752425+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      }
+    ],
+    "Unmatch": [
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": false
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "cmdkey.exe  /list ",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\cmdkey.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": false,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": false,
+          "Selection Reason": "The rule condition evaluated to False.",
+          "Values": {
+            "CommandLine": "cmdkey.exe  /list ",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\cmdkey.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-5",
+            "Log Record ID": "dbf83b09-0b8a-4c3c-80f9-0541dea93dd0",
+            "Time Created": "2026-10-02T20:26:05.693628500Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-15",
+            "Log Record ID": "69bcc66d-f9ea-4c16-82f0-f231fe29e0fa",
+            "Time Created": "2026-10-02T20:27:53.772837300Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G5",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.693628+00:00",
+          "Last Seen": "2026-10-02T20:27:53.772837+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": false
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": true
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\cmd.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": false,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": false,
+          "Selection Reason": "The rule condition evaluated to False.",
+          "Values": {
+            "CommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\cmd.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-8",
+            "Log Record ID": "c4edd403-464c-4245-b39d-2572bbad4f0d",
+            "Time Created": "2026-10-02T20:26:05.660573300Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-18",
+            "Log Record ID": "d3db1edc-c00b-4f32-867b-e84b139bf8f8",
+            "Time Created": "2026-10-02T20:27:53.737644400Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G8",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.660573+00:00",
+          "Last Seen": "2026-10-02T20:27:53.737644+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": false
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "\"C:\\Windows\\system32\\whoami.exe\"",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\whoami.exe",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": false,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": false,
+          "Selection Reason": "The rule condition evaluated to False.",
+          "Values": {
+            "CommandLine": "\"C:\\Windows\\system32\\whoami.exe\"",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\whoami.exe"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-9",
+            "Log Record ID": "d4cd6760-1da5-4f09-8e42-90359adb9c53",
+            "Time Created": "2026-10-02T20:26:05.518106500Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-19",
+            "Log Record ID": "b73e6740-cb46-407d-afdc-3047a42f7e21",
+            "Time Created": "2026-10-02T20:27:53.579348600Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G9",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.518106+00:00",
+          "Last Seen": "2026-10-02T20:27:53.579348+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      },
+      {
+        "Evidence": {
+          "Block Results": {
+            "selection": false
+          },
+          "Checks": {
+            "selection": {
+              "CommandLine|contains": {
+                "Actual": "\"C:\\Windows\\system32\\HOSTNAME.EXE\"",
+                "Expected": [
+                  " user",
+                  " localgroup",
+                  " group"
+                ],
+                "Field": "CommandLine",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "contains"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": " user",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " localgroup",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": " group",
+                    "Matched": false
+                  }
+                ]
+              },
+              "EventID": {
+                "Actual": "1",
+                "Expected": 1,
+                "Field": "EventID",
+                "Field Present": true,
+                "Matched": true,
+                "Modifiers": [],
+                "Reason": "The field matched at least one expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": 1,
+                    "Matched": true
+                  }
+                ]
+              },
+              "Image|endswith": {
+                "Actual": "C:\\Windows\\System32\\HOSTNAME.EXE",
+                "Expected": [
+                  "\\net.exe",
+                  "\\net1.exe"
+                ],
+                "Field": "Image",
+                "Field Present": true,
+                "Matched": false,
+                "Modifiers": [
+                  "endswith"
+                ],
+                "Reason": "The field did not match any expected value.",
+                "Value Checks": [
+                  {
+                    "Expected": "\\net.exe",
+                    "Matched": false
+                  },
+                  {
+                    "Expected": "\\net1.exe",
+                    "Matched": false
+                  }
+                ]
+              }
+            }
+          },
+          "Condition": "selection",
+          "Condition Explanation": {
+            "Name": "selection",
+            "Result": false,
+            "Type": "reference"
+          },
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "sysmon",
+                "Matched": true
+              }
+            },
+            "Status": true
+          },
+          "Selection": false,
+          "Selection Reason": "The rule condition evaluated to False.",
+          "Values": {
+            "CommandLine": "\"C:\\Windows\\system32\\HOSTNAME.EXE\"",
+            "EventID": "1",
+            "Image": "C:\\Windows\\System32\\HOSTNAME.EXE"
+          }
+        },
+        "Count": 2,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-10",
+            "Log Record ID": "46133dad-9b12-4824-bad0-6b4de864048d",
+            "Time Created": "2026-10-02T20:26:05.509786800Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0cefa7af-8248-4503-b605-746125726ded-20",
+            "Log Record ID": "233c39cc-0846-41d5-b679-4661e80d7142",
+            "Time Created": "2026-10-02T20:27:53.554252200Z"
+          }
+        ],
+        "Group Reference": "0cefa7af-8248-4503-b605-746125726ded-G10",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.509786+00:00",
+          "Last Seen": "2026-10-02T20:27:53.554252+00:00",
+          "Valid Time": 2,
+          "Unavailable Timestamps": 0
+        }
+      }
+    ]
+  },
+  "Check Summary": [
+    {
+      "Pattern": {
+        "Block Results": {
+          "selection": true
+        },
+        "Checks": {
+          "selection": {
+            "CommandLine|contains": {
+              "Field Present": true,
+              "Matched": true
+            },
+            "EventID": {
+              "Field Present": true,
+              "Matched": true
+            },
+            "Image|endswith": {
+              "Field Present": true,
+              "Matched": true
+            }
+          }
+        },
+        "Logsource": {
+          "Checks": {
+            "product": {
+              "Matched": true
+            },
+            "service": {
+              "Matched": true
+            }
+          },
+          "Status": true
+        },
+        "Selection": true
+      },
+      "Count": 12,
+      "Group Count": 6,
+      "Example Groups": [
+        "0cefa7af-8248-4503-b605-746125726ded-G1",
+        "0cefa7af-8248-4503-b605-746125726ded-G2"
+      ],
+      "Group References": [
+        "0cefa7af-8248-4503-b605-746125726ded-G1",
+        "0cefa7af-8248-4503-b605-746125726ded-G2",
+        "0cefa7af-8248-4503-b605-746125726ded-G3",
+        "0cefa7af-8248-4503-b605-746125726ded-G4",
+        "0cefa7af-8248-4503-b605-746125726ded-G6",
+        "0cefa7af-8248-4503-b605-746125726ded-G7"
+      ],
+      "Pattern Reference": "P1"
+    },
+    {
+      "Pattern": {
+        "Block Results": {
+          "selection": false
+        },
+        "Checks": {
+          "selection": {
+            "CommandLine|contains": {
+              "Field Present": true,
+              "Matched": false
+            },
+            "EventID": {
+              "Field Present": true,
+              "Matched": true
+            },
+            "Image|endswith": {
+              "Field Present": true,
+              "Matched": false
+            }
+          }
+        },
+        "Logsource": {
+          "Checks": {
+            "product": {
+              "Matched": true
+            },
+            "service": {
+              "Matched": true
+            }
+          },
+          "Status": true
+        },
+        "Selection": false
+      },
+      "Count": 6,
+      "Group Count": 3,
+      "Example Groups": [
+        "0cefa7af-8248-4503-b605-746125726ded-G5",
+        "0cefa7af-8248-4503-b605-746125726ded-G9"
+      ],
+      "Group References": [
+        "0cefa7af-8248-4503-b605-746125726ded-G5",
+        "0cefa7af-8248-4503-b605-746125726ded-G9",
+        "0cefa7af-8248-4503-b605-746125726ded-G10"
+      ],
+      "Pattern Reference": "P2"
+    },
+    {
+      "Pattern": {
+        "Block Results": {
+          "selection": false
+        },
+        "Checks": {
+          "selection": {
+            "CommandLine|contains": {
+              "Field Present": true,
+              "Matched": true
+            },
+            "EventID": {
+              "Field Present": true,
+              "Matched": true
+            },
+            "Image|endswith": {
+              "Field Present": true,
+              "Matched": false
+            }
+          }
+        },
+        "Logsource": {
+          "Checks": {
+            "product": {
+              "Matched": true
+            },
+            "service": {
+              "Matched": true
+            }
+          },
+          "Status": true
+        },
+        "Selection": false
+      },
+      "Count": 2,
+      "Group Count": 1,
+      "Example Groups": [
+        "0cefa7af-8248-4503-b605-746125726ded-G8"
+      ],
+      "Group References": [
+        "0cefa7af-8248-4503-b605-746125726ded-G8"
+      ],
+      "Pattern Reference": "P3"
+    }
+  ],
+  "Atomic Runs": [
+    {
+      "Run Reference": "R1",
+      "Atomic Run": {
+        "Execution Time (UTC)": "2026-10-02T20:26:05Z",
+        "Execution Time (Local)": "2026-10-02T23:26:05Z",
+        "Technique": "T1087.001",
+        "Test Number": "8",
+        "Test Name": "Enumerate all accounts on Windows (Local)",
+        "Hostname": "WIN-5D606EQID5C",
+        "IP Address": "192.168.56.5",
+        "Username": "corp\\administrator",
+        "GUID": "80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ProcessId": "4976",
+        "ExitCode": "0"
+      },
+      "Candidate Events": 10,
+      "Events Summary": {
+        "Total Events": 10,
+        "Match": 6,
+        "Unmatch": 4,
+        "Skipped": 0
+      },
+      "Event References": [
+        "0cefa7af-8248-4503-b605-746125726ded-1",
+        "0cefa7af-8248-4503-b605-746125726ded-2",
+        "0cefa7af-8248-4503-b605-746125726ded-3",
+        "0cefa7af-8248-4503-b605-746125726ded-4",
+        "0cefa7af-8248-4503-b605-746125726ded-5",
+        "0cefa7af-8248-4503-b605-746125726ded-6",
+        "0cefa7af-8248-4503-b605-746125726ded-7",
+        "0cefa7af-8248-4503-b605-746125726ded-8",
+        "0cefa7af-8248-4503-b605-746125726ded-9",
+        "0cefa7af-8248-4503-b605-746125726ded-10"
+      ],
+      "Correlation Issues": []
+    },
+    {
+      "Run Reference": "R2",
+      "Atomic Run": {
+        "Execution Time (UTC)": "2026-10-02T20:27:53Z",
+        "Execution Time (Local)": "2026-10-02T23:27:53Z",
+        "Technique": "T1087.001",
+        "Test Number": "8",
+        "Test Name": "Enumerate all accounts on Windows (Local)",
+        "Hostname": "WIN-5D606EQID5C",
+        "IP Address": "192.168.56.5",
+        "Username": "corp\\administrator",
+        "GUID": "80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ProcessId": "996",
+        "ExitCode": "0"
+      },
+      "Candidate Events": 10,
+      "Events Summary": {
+        "Total Events": 10,
+        "Match": 6,
+        "Unmatch": 4,
+        "Skipped": 0
+      },
+      "Event References": [
+        "0cefa7af-8248-4503-b605-746125726ded-11",
+        "0cefa7af-8248-4503-b605-746125726ded-12",
+        "0cefa7af-8248-4503-b605-746125726ded-13",
+        "0cefa7af-8248-4503-b605-746125726ded-14",
+        "0cefa7af-8248-4503-b605-746125726ded-15",
+        "0cefa7af-8248-4503-b605-746125726ded-16",
+        "0cefa7af-8248-4503-b605-746125726ded-17",
+        "0cefa7af-8248-4503-b605-746125726ded-18",
+        "0cefa7af-8248-4503-b605-746125726ded-19",
+        "0cefa7af-8248-4503-b605-746125726ded-20"
+      ],
+      "Correlation Issues": []
+    },
+    {
+      "Run Reference": "R3",
+      "Atomic Run": {
+        "Execution Time (UTC)": "2026-10-02T20:26:05Z",
+        "Execution Time (Local)": "2026-10-02T23:26:05Z",
+        "Technique": "T1087.001",
+        "Test Number": "8",
+        "Test Name": "Validation: run without candidate events",
+        "Hostname": "DVP-NO-EVENTS-TEST",
+        "IP Address": "192.168.56.5",
+        "Username": "corp\\administrator",
+        "GUID": "80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ProcessId": "4976",
+        "ExitCode": "0"
+      },
+      "Candidate Events": 0,
+      "Events Summary": {
+        "Total Events": 0,
+        "Match": 0,
+        "Unmatch": 0,
+        "Skipped": 0
+      },
+      "Event References": [],
+      "Correlation Issues": []
+    }
+  ],
+  "Conclusion": "The rule condition matched 12 of 20 evaluated events."
+}

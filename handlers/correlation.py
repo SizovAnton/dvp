@@ -6,7 +6,8 @@ def link_atomic_runs(at_runs, events, correlation_config):
     results = []
     time_window = correlation_config["time_window_seconds"]
 
-    for at_run in at_runs:
+    for number, at_run in enumerate(at_runs, start=1):
+        run_reference = f"R{number}"
         match = []
         correlation_issues = []
 
@@ -20,6 +21,7 @@ def link_atomic_runs(at_runs, events, correlation_config):
             })
 
             results.append({
+                "run_reference" : run_reference,
                 "atomic_run": at_run,
                 "candidate_events": match,
                 "correlation_issues": correlation_issues
@@ -51,6 +53,7 @@ def link_atomic_runs(at_runs, events, correlation_config):
                 match.append(data)
 
         results.append({
+            "run_reference" : run_reference,
             "atomic_run": at_run,
             "candidate_events": match,
             "correlation_issues" : correlation_issues
@@ -62,4 +65,5 @@ def get_items(linked_runs):
 
         for event in run_result["candidate_events"]:
 
-            yield event
+            yield {**event,
+                   "run_reference" : run_result["run_reference"]}

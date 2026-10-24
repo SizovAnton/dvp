@@ -4,7 +4,7 @@ from pathlib import Path
 
 from rich.console import Console, Group
 
-from displaying.reviw import build_event_review_view
+from displaying.reviw import build_event_review_view, build_atomic_runs_view
 from displaying.table import build_report_metadata_view
 from handlers.correlation import get_items, link_atomic_runs
 from handlers.events import process_events
@@ -42,17 +42,18 @@ def main():
     save_report_json(report, output_path)
 
     metadata_view = build_report_metadata_view(report)
-    #evidence_view = build_event_review_view(report)
 
     evidence_view = build_event_review_view(
     report
 )
+
+    atomic_runs_view = build_atomic_runs_view(report)
+
     output_path = reports_dir / f'{report["Report ID"]}.json'
       
     console = Console()
-    console.print(Group(metadata_view, evidence_view))
+    console.print(Group(metadata_view, atomic_runs_view, evidence_view))
     console.print(f"Report saved: {output_path}", markup=False)
-
     
 
     return report

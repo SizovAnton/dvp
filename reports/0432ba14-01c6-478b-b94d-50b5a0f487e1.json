@@ -1,0 +1,305 @@
+{
+  "Report ID": "0432ba14-01c6-478b-b94d-50b5a0f487e1",
+  "Events Summary": {
+    "Total Events": 20,
+    "Match": 0,
+    "Unmatch": 0,
+    "Skipped": 20
+  },
+  "Rule": {
+    "Rule ID": "5e638b9d-ec3b-468e-9080-60b64be1bc55",
+    "Rule Title": "Локальне перерахування облікових записів користувачів (net.exe)",
+    "Rule Description": "Виявляє спроби перерахування локальних облікових записів або членів груп за допомогою утиліти net.exe, що відповідає техніці MITRE ATT&CK T1087.001 (на основі тесту Atomic Red Team).",
+    "Logsource": {
+      "product": "windows",
+      "service": "security"
+    },
+    "Detection": {
+      "selection": {
+        "EventID": 1,
+        "Image|endswith": [
+          "\\net.exe",
+          "\\net1.exe"
+        ],
+        "CommandLine|contains": [
+          " user",
+          " localgroup",
+          " group"
+        ]
+      },
+      "condition": "selection"
+    }
+  },
+  "Correlation Issues": [],
+  "Event Review": {
+    "Match": [],
+    "Unmatch": [],
+    "Skipped": [
+      {
+        "Evidence": {
+          "Block Results": {},
+          "Checks": {},
+          "Condition": "selection",
+          "Condition Explanation": null,
+          "Event Context": {
+            "Channel": "Microsoft-Windows-Sysmon/Operational",
+            "Computer": "WIN-5D606EQID5C.corp.local",
+            "Provider": "Microsoft-Windows-Sysmon"
+          },
+          "Logsource": {
+            "Checks": {
+              "product": {
+                "Actual": "windows",
+                "Expected": "windows",
+                "Matched": true
+              },
+              "service": {
+                "Actual": "sysmon",
+                "Expected": "security",
+                "Matched": false
+              }
+            },
+            "Status": false
+          },
+          "Selection": null,
+          "Selection Reason": "Condition was not evaluated because the logsource does not match the rule requirements.",
+          "Values": {}
+        },
+        "Count": 20,
+        "References": [
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-1",
+            "Log Record ID": "c3a1e5f1-096d-442c-98e4-59eb8c0bc99d",
+            "Time Created": "2026-10-02T20:26:05.716389600Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-2",
+            "Log Record ID": "6d9fc09a-40a9-4512-8eec-35ee3245f432",
+            "Time Created": "2026-10-02T20:26:05.711986700Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-3",
+            "Log Record ID": "624a285d-d293-4fe2-b56b-922112cd5bde",
+            "Time Created": "2026-10-02T20:26:05.702981600Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-4",
+            "Log Record ID": "5f8afb11-08a4-4211-abb2-9317480129c1",
+            "Time Created": "2026-10-02T20:26:05.698512300Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-5",
+            "Log Record ID": "4d33293e-b998-4e7e-82f9-7e319b78c779",
+            "Time Created": "2026-10-02T20:26:05.693628500Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-6",
+            "Log Record ID": "6dd83261-4f80-432c-8112-eb80be17cf92",
+            "Time Created": "2026-10-02T20:26:05.679590000Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-7",
+            "Log Record ID": "1de8b36d-2be5-4767-9725-2edb7d03049d",
+            "Time Created": "2026-10-02T20:26:05.675205600Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-8",
+            "Log Record ID": "4122757c-c22c-43fb-b76c-fbaf74b64f5e",
+            "Time Created": "2026-10-02T20:26:05.660573300Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-9",
+            "Log Record ID": "e220e3e9-cde0-424a-bec8-a672d5f3c3a8",
+            "Time Created": "2026-10-02T20:26:05.518106500Z"
+          },
+          {
+            "Run Reference": "R1",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-10",
+            "Log Record ID": "ac105b65-2740-4954-8d9f-9b544436f0bb",
+            "Time Created": "2026-10-02T20:26:05.509786800Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-11",
+            "Log Record ID": "c3557ba5-7a80-4936-a536-0e946f7dc44a",
+            "Time Created": "2026-10-02T20:27:53.798776700Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-12",
+            "Log Record ID": "5f4c9c3f-056b-4bd6-b1cd-8b005cdc2fdc",
+            "Time Created": "2026-10-02T20:27:53.793691500Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-13",
+            "Log Record ID": "fa58dfe1-68da-4303-94db-d2f8295f26be",
+            "Time Created": "2026-10-02T20:27:53.782021700Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-14",
+            "Log Record ID": "04b9cf62-6313-409b-92e4-fc2645dccd59",
+            "Time Created": "2026-10-02T20:27:53.777671600Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-15",
+            "Log Record ID": "85577c8c-f778-4259-93e3-1a48797c9570",
+            "Time Created": "2026-10-02T20:27:53.772837300Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-16",
+            "Log Record ID": "e23fe0d2-dcfb-46f9-ae94-3973978ec97c",
+            "Time Created": "2026-10-02T20:27:53.756895400Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-17",
+            "Log Record ID": "a1adf56c-1357-44bf-a987-4d9c45769a18",
+            "Time Created": "2026-10-02T20:27:53.752425600Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-18",
+            "Log Record ID": "570058e6-5a17-47b1-97d8-5ab36d087865",
+            "Time Created": "2026-10-02T20:27:53.737644400Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-19",
+            "Log Record ID": "ecfaa3b5-9559-469a-bcc3-74d4ad6ca5d8",
+            "Time Created": "2026-10-02T20:27:53.579348600Z"
+          },
+          {
+            "Run Reference": "R2",
+            "Event Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-20",
+            "Log Record ID": "c79a07fc-f5af-4ccc-bfdd-fec1a148f2d5",
+            "Time Created": "2026-10-02T20:27:53.554252200Z"
+          }
+        ],
+        "Group Reference": "0432ba14-01c6-478b-b94d-50b5a0f487e1-G1",
+        "Time Summary": {
+          "First Seen": "2026-10-02T20:26:05.509786+00:00",
+          "Last Seen": "2026-10-02T20:27:53.798776+00:00",
+          "Valid Time": 20,
+          "Unavailable Timestamps": 0
+        }
+      }
+    ]
+  },
+  "Check Summary": [
+    {
+      "Pattern": {
+        "Block Results": {},
+        "Checks": {},
+        "Logsource": {
+          "Checks": {
+            "product": {
+              "Matched": true
+            },
+            "service": {
+              "Matched": false
+            }
+          },
+          "Status": false
+        },
+        "Selection": null
+      },
+      "Count": 20,
+      "Group Count": 1,
+      "Example Groups": [
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-G1"
+      ],
+      "Group References": [
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-G1"
+      ],
+      "Pattern Reference": "P1"
+    }
+  ],
+  "Atomic Runs": [
+    {
+      "Run Reference": "R1",
+      "Atomic Run": {
+        "Execution Time (UTC)": "2026-10-02T20:26:05Z",
+        "Execution Time (Local)": "2026-10-02T23:26:05Z",
+        "Technique": "T1087.001",
+        "Test Number": "8",
+        "Test Name": "Enumerate all accounts on Windows (Local)",
+        "Hostname": "WIN-5D606EQID5C",
+        "IP Address": "192.168.56.5",
+        "Username": "corp\\administrator",
+        "GUID": "80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ProcessId": "4976",
+        "ExitCode": "0"
+      },
+      "Candidate Events": 10,
+      "Events Summary": {
+        "Total Events": 10,
+        "Match": 0,
+        "Unmatch": 0,
+        "Skipped": 10
+      },
+      "Event References": [
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-1",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-2",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-3",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-4",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-5",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-6",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-7",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-8",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-9",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-10"
+      ],
+      "Correlation Issues": []
+    },
+    {
+      "Run Reference": "R2",
+      "Atomic Run": {
+        "Execution Time (UTC)": "2026-10-02T20:27:53Z",
+        "Execution Time (Local)": "2026-10-02T23:27:53Z",
+        "Technique": "T1087.001",
+        "Test Number": "8",
+        "Test Name": "Enumerate all accounts on Windows (Local)",
+        "Hostname": "WIN-5D606EQID5C",
+        "IP Address": "192.168.56.5",
+        "Username": "corp\\administrator",
+        "GUID": "80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ProcessId": "996",
+        "ExitCode": "0"
+      },
+      "Candidate Events": 10,
+      "Events Summary": {
+        "Total Events": 10,
+        "Match": 0,
+        "Unmatch": 0,
+        "Skipped": 10
+      },
+      "Event References": [
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-11",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-12",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-13",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-14",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-15",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-16",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-17",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-18",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-19",
+        "0432ba14-01c6-478b-b94d-50b5a0f487e1-20"
+      ],
+      "Correlation Issues": []
+    }
+  ],
+  "Conclusion": "All 20 events were skipped; the rule condition was not evaluated."
+}
