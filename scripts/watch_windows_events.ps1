@@ -4,6 +4,8 @@ param(
     [string]$LogName
 )
 
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+
 $sourceIdentifier = "DVP.WindowsEvents"
 $registered = $false
 
@@ -26,28 +28,59 @@ try {
     $registered = $true
     $watcher.Enabled = $true
 
-    $notification = Wait-Event `
-        -SourceIdentifier $sourceIdentifier `
-        -Timeout 30
+    [Console]::Error.WriteLine("Collector ready")
 
-    if ($null -eq $notification) {
-        Write-Output "No notification recived within 30 seconds."
-    }
-    else {
-        $eventArgs = $notification.SourceEventArgs
+    $processed = 0
 
-        if ($null -ne $eventArgs.EventException) {
-            throw $eventArgs.EventException
+    while ($processed -lt 3) {
+        $notification = Wait-Event `
+            -SourceIdentifier $sourceIdentifier `
+            -Timeout 30
+
+        if ($null -eq $notification) {
+            [Console]::Error.WriteLine("No notification received within 30 seconds")
+            break
         }
+        $record = $null
 
-        $record = $eventArgs.EventRecord
+        try {
+            $eventData = $notification.SourceEventArgs
+            $record = $eventData.EventRecord
 
-        if ($null -eq $record) {
-            throw "Notification contains no event record."
+            if ($null -ne $eventData.EventException) {
+                throw $eventData.EventException
+            }
+
+            if ($null -eq $record) {
+                throw "Notification contains no event record."
+            }
+
+            $message = @{
+                xml = $record.ToXml()
+            }
+
+            $jsonLine = $message | ConvertTo-Json -Compress
+
+            [Console]::Out.WriteLine($jsonLine)
+            [Console]::Out.Flush()
+
+            $processed++
         }
-        Write-Output $record.ToXml()
+        finally {
+            if ($null -ne $record) {
+                $record.Dispose()
+            }
+
+            Remove-Event -EventIdentifier $notification.EventIdentifier
+        }
     }
 
+}
+catch {
+    [Console]::Error.WriteLine(
+        "Event collection failed: {0}",
+        $_.Exception.Message)
+    exit 1
 }
 
 finally {
