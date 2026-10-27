@@ -4,6 +4,9 @@ import subprocess
 import json
 import xml.etree.ElementTree as ET
 
+from handlers.events import process_events
+from handlers.file_handlers import load_configuration
+
 collected_events = []
 namespace = {"evt": "http://schemas.microsoft.com/win/2004/08/events/event"}
 
@@ -13,6 +16,10 @@ else:
     project_dir = Path(__file__).resolve().parents[1]
 
 script_path = project_dir / "scripts" / "watch_windows_events.ps1"
+setting_default_path = project_dir / "config" / "default.config"
+setting_custom_path = project_dir / "config" / "config.json"
+
+configuration = load_configuration(setting_default_path, setting_custom_path)
 
 if not script_path.is_file():
     raise FileNotFoundError(f"PowerShell script not found: {script_path}")
@@ -35,7 +42,12 @@ with subprocess.Popen(
         for line in stdout:
             message = json.loads(line)
             root = ET.fromstring(message["xml"])
-            collected_events.append(root)
+            prepared_events = process_events([root], configuration)
+            collected_events.extend(prepared_events)
+
+            for event in prepared_events:
+                print(event["event_id"], event["computer"], event["source"]["description"], flush=True)
+
 
             record_id = root.findtext("evt:System/evt:EventRecordID", namespaces=namespace)
             event_id = root.findtext("evt:System/evt:EventID", namespaces=namespace)
