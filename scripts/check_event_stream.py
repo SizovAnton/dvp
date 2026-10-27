@@ -1,4 +1,5 @@
-
+import sys 
+from pathlib import Path
 import subprocess
 import json
 import xml.etree.ElementTree as ET
@@ -6,12 +7,22 @@ import xml.etree.ElementTree as ET
 collected_events = []
 namespace = {"evt": "http://schemas.microsoft.com/win/2004/08/events/event"}
 
+if getattr(sys, 'frozen', False):
+    project_dir = Path(sys.executable).resolve().parent
+else:
+    project_dir = Path(__file__).resolve().parents[1]
+
+script_path = project_dir / "scripts" / "watch_windows_events.ps1"
+
+if not script_path.is_file():
+    raise FileNotFoundError(f"PowerShell script not found: {script_path}")
+
 with subprocess.Popen(
     ["powershell.exe",
     "-NoProfile",
     "-NonInteractive",
     "-File",
-    r"C:\Test Env\watch_windows_events.ps1",
+    str(script_path),
     "-LogName",
     "Microsoft-Windows-Sysmon/Operational"
     ],
