@@ -55,8 +55,35 @@ try {
         -ExecutionLogPath $executionLogPath `
         -ErrorAction Stop *> $diagnosticLogPath
 
-    [Console]::Error.WriteLine("Scenario invocation finished")
     [Console]::Error.WriteLine("Run directory: {0}", $runDirectory)
+
+    if (-not(Test-Path -LiteralPath $executionLogPath -PathType Leaf)) {
+        throw "Execution log not found: $executionLogPath"
+    }
+    $rows = @(Import-Csv -LiteralPath $executionLogPath -ErrorAction Stop)
+
+    $matchingRuns = @(
+        $rows | Where-Object {
+            $_.GUID -eq $TestGuid -and
+            $_.Technique -eq $Technique
+        }
+    )
+
+    if ($matchingRuns.Count -ne 1) {
+        throw "Expected one matching execution record; found $($matchingRuns.Count)"
+    }
+    $testRun = $matchingRuns[0]
+    $testExitCode = 0
+
+    if (-not [int]::TryParse($testRun.ExitCode, [ref]$testExitCode)) {
+        throw "Execution record contains an invalid ExitCode: '$($testRun.ExitCode)'"
+    }
+
+    if ($testExitCode -ne 0) {
+        throw "Scenario execution failed with exit code $testExitCode"
+    }
+    [Console]::Error.WriteLine("Scenario execution succeeded")
+    exit 0
 
 }
 catch {
