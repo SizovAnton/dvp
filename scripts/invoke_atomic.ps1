@@ -14,8 +14,9 @@ param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
     [string]$TestGuid
-
 )
+
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 
 try {
     if (-not (Test-Path -LiteralPath $ModulePath -PathType Leaf)) {
@@ -82,7 +83,22 @@ try {
     if ($testExitCode -ne 0) {
         throw "Scenario execution failed with exit code $testExitCode"
     }
+    
+    $result = @{
+        status         = "succeeded"
+        run_id         = $runId
+        technique      = $Technique
+        test_guid      = $TestGuid
+        exit_code      = $testExitCode
+        execution_log  = $executionLogPath
+        diagnostic_log = $diagnosticLogPath
+    }
+
+    $resultJson = $result | ConvertTo-Json -Compress
+
+    [Console]::Out.WriteLine($resultJson)
     [Console]::Error.WriteLine("Scenario execution succeeded")
+
     exit 0
 
 }
