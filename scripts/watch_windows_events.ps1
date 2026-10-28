@@ -5,7 +5,10 @@ param(
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string]$StopFile
+    [string]$StopFile,
+
+    [ValidateRange(0, 60)]
+    [int]$PostRunWaitSeconds = 3
 )
 
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -82,14 +85,34 @@ try {
 
     [Console]::Out.WriteLine($readyJson)
     [Console]::Out.Flush()
-    Start-Sleep -Seconds 30
+    
     $processed = 0
 
-    while (-not (Test-Path -LiteralPath $StopFile -ErrorAction Stop)) {
+    $postRunTimer = $null
+
+    while ($true) {
+        If ($null -eq $postRunTimer) {
+            if (Test-Path -LiteralPath $StopFile -ErrorAction Stop) {
+                $postRunTimer = [System.Diagnostics.Stopwatch]::StartNew()
+
+                [Console]::Error.WriteLine(
+                    "Stop requested; post-run wait: {0} seconds",
+                    $PostRunWaitSeconds
+                )
+            }
+        }
+
+
+        if ($null -ne $postRunTimer) {
+            if ($postRunTimer.Elapsed.TotalSeconds -ge $PostRunWaitSeconds) {
+                break
+            }
+        }
+
         $notification = Wait-Event `
             -SourceIdentifier $sourceIdentifier `
             -Timeout 1
-
+    
         if ($null -eq $notification) {
             continue
         }
@@ -97,7 +120,11 @@ try {
         Send-EventNotification -Notification $notification
         $processed++
     }
-    [Console]::Error.WriteLine("Stop signal received")
+
+    [Console]::Error.WriteLine(
+        "Post-run observation finished; elapsed: {0:F2} seconds",
+        $postRunTimer.Elapsed.TotalSeconds
+    )
 
     $watcher.Enabled = $false
     $drained = 0
