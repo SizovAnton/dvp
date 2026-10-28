@@ -24,6 +24,8 @@ configuration = load_configuration(setting_default_path, setting_custom_path)
 if not script_path.is_file():
     raise FileNotFoundError(f"PowerShell script not found: {script_path}")
 
+collector_ready = False
+
 with subprocess.Popen(
     ["powershell.exe",
     "-NoProfile",
@@ -41,6 +43,20 @@ with subprocess.Popen(
     if stdout is not None:
         for line in stdout:
             message = json.loads(line)
+
+            if not isinstance(message, dict):
+                raise ValueError("Collector message must be a JSON object")
+
+            if message.get("type") == "ready":
+                collector_ready = True
+                print("Collector readiness confirmed", flush=True)
+                continue
+
+            if message.get("type") != "event":
+                raise ValueError(
+                    f"Unknown collector message type: {message.get('type')!r}"
+                )
+            
             root = ET.fromstring(message["xml"])
             prepared_events = process_events([root], configuration)
             collected_events.extend(prepared_events)
@@ -58,5 +74,9 @@ with subprocess.Popen(
 
     if returncode != 0:
         raise RuntimeError(f"PowerShell exited with code {returncode}")
+
+    if not collector_ready:
+        raise RuntimeError("Collector did not confirm readiness")
+    
     print("Collected events:", len(collected_events))
     print("returncode:", returncode)

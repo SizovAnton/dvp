@@ -28,7 +28,15 @@ try {
     $registered = $true
     $watcher.Enabled = $true
 
-    [Console]::Error.WriteLine("Collector ready")
+    $readMessage = @{
+        type     = "ready"
+        log_name = $LogName
+    }
+
+    $readyJson = $readMessage | ConvertTo-Json -Compress
+
+    [Console]::Out.WriteLine($readyJson)
+    [Console]::Out.Flush()
 
     $processed = 0
 
@@ -56,7 +64,8 @@ try {
             }
 
             $message = @{
-                xml = $record.ToXml()
+                type = "event"
+                xml  = $record.ToXml()
             }
 
             $jsonLine = $message | ConvertTo-Json -Compress
