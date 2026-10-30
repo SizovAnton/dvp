@@ -1,0 +1,9 @@
+{
+  "exit_code": 0,
+  "technique": "T1087.001",
+  "execution_log": "C:\\Test Env\\dvp-live-check\\scripts\\runs\\edf48f2b-aeb9-44d2-8b27-80a3ce5f30d3\\execution.csv",
+  "diagnostic_log": "C:\\Test Env\\dvp-live-check\\scripts\\runs\\edf48f2b-aeb9-44d2-8b27-80a3ce5f30d3\\diagnostic.log",
+  "test_guid": "80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+  "status": "succeeded",
+  "run_id": "edf48f2b-aeb9-44d2-8b27-80a3ce5f30d3"
+}

@@ -25,14 +25,31 @@
     "provider": "Microsoft-Windows-Sysmon",
     "description": "Windows Sysmon",
     "product": "windows",
-    "service": "sysmon"
+    "service": "sysmon",
+    "process_creation":{
+      "event_id": "1",
+      "pid_field": "ProcessId",
+      "pid_base": 10,
+      "parent_pid_field": "ParentProcessId",
+      "parent_pid_base": 10,
+      "guid_field": "ProcessGuid",
+      "parent_guid_field": "ParentProcessGuid"}
 },
 {
     "channel" : "Security",
     "provider" : "Microsoft-Windows-Security-Auditing",
     "description" : "Windows Security Auditing",
     "product" : "windows",
-    "service" : "security"
+    "service" : "security",
+    "process_creation": {
+      "event_id": "4688",
+      "pid_field": "NewProcessId",
+      "pid_base": 16,
+      "parent_pid_field": "ProcessId",
+      "parent_pid_base": 16,
+      "guid_field": null,
+      "parent_guid_field": null
+ }
 }
 ]
 }
