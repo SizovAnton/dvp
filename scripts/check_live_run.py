@@ -19,7 +19,7 @@ def run_scenario_and_stop(scenario_command, stop_file):
     finally:
         stop_file.touch()
 
-def main():
+def run_live_session(technique, test_number):
     if getattr(sys, 'frozen', False):
         project_dir = Path(sys.executable).resolve().parent
     else:
@@ -35,10 +35,9 @@ def main():
 
     config = load_configuration(default_config, config_json)
     atomic = config.get("atomic")
-    scenario = config.get("scenario")
 
-    if (not isinstance(atomic, dict) or not atomic) or (not isinstance(scenario, dict) or not scenario):
-        raise ValueError("Atomic and Scenario configuration must be a non-empty dictionary")
+    if not isinstance(atomic, dict) or not atomic:
+        raise ValueError("Atomic configuration must be a non-empty dictionary")
 
     for field in ("module_path", "atomics_path"):
         value = atomic.get(field)
@@ -46,11 +45,13 @@ def main():
         if not isinstance(value, str) or not value.strip():
             raise ValueError(f"atomic.{field} must be a non-empty string")
 
-    for field in ("technique", "test_guid"):
-        value = scenario.get(field)
+    if not isinstance(technique, str) or not technique.strip():
+        raise ValueError("Technique must be a non-empty string")
 
-        if not isinstance(value, str) or not value.strip():
-            raise ValueError(f"scenario.{field} must be a non-empty string")
+    technique = technique.strip().upper()
+
+    if type(test_number) is not int or not 1 <= test_number <= 2147483647:
+        raise ValueError("Test number must be a positive 32-bit integer")
 
     scenario_command = [
         "powershell.exe",
@@ -59,13 +60,13 @@ def main():
         "-File",
         str(invoke_atomic_path),
         "-ModulePath",
-        config["atomic"]["module_path"],
+        atomic["module_path"],
         "-AtomicPath",
-        config["atomic"]["atomics_path"],
+        atomic["atomics_path"],
         "-Technique",
-        config["scenario"]["technique"],
-        "-TestGuid",
-        config["scenario"]["test_guid"],
+        technique,
+        "-TestNumber",
+        str(test_number),
     ]
 
     session_id = str(uuid4())
@@ -103,11 +104,6 @@ def main():
     collected_events = []
     collector_ready = False
     scenario_future = None
-
-
-    namespace = {
-        "evt": "http://schemas.microsoft.com/win/2004/08/events/event"
-    }
 
     collector_log_path = session_dir / "collector.log"
 
@@ -156,17 +152,6 @@ def main():
                         root = ET.fromstring(message["xml"])
                         prepared_events = process_events([root], config)
                         collected_events.extend(prepared_events) 
-
-                        record_id = root.findtext("evt:System/evt:EventRecordID",
-                            namespaces=namespace,)  
-
-                        event_id = root.findtext("evt:System/evt:EventID",
-                            namespaces=namespace,)
-
-                        print(
-                            f"Record: {record_id}, Event ID: {event_id}",
-                            flush=True,
-                        )
 
                     collector_returncode = collector.wait()
 
@@ -226,18 +211,6 @@ def main():
     process_candidates = correlation["process_candidates"]
     process_evidence = correlation["process_evidence"]
 
-    # root_candidates, root_evidence = find_root_candidates(at_run, collected_events)
-    # process_candidates = []
-    # process_evidence = []
-
-    # if not root_candidates:
-    #     correlation_status = "root_not_found"
-    # elif len(root_candidates) == 1:
-    #     process_candidates, process_evidence = collect_process_candidates(root_candidates[0], collected_events)
-    #     correlation_status = "candidates_collected"
-    # else: 
-    #     correlation_status = "multiple_root_candidates"
-
     correlation_result = {
         "session_id" : session_id,
         "run_id" : execution_results["run_id"],
@@ -252,15 +225,11 @@ def main():
     with output_correlation.open("w", encoding="utf-8") as output_correlation_file:
         json.dump(correlation_result, output_correlation_file, ensure_ascii=False, indent=2)
 
-    print("Correlation status:", correlation_status)
-    print("Root candidates:", len(root_candidates))
-    print("Process candidates:", len(process_candidates))
-    
-    
-    print("Scenario status:", execution_results["status"])
-    print("Run ID:", execution_results["run_id"])
-    print("Collected events:", len(collected_events))
+    return {
+        "session_dir": session_dir,
+        "events": collected_events,
+        "scenario": execution_results,
+        "atomic_run": at_run,
+        "correlation": correlation,
+    }
                                             
-
-if __name__ == "__main__":
-    main()

@@ -1,21 +1,15 @@
 import argparse
-from ast import parse
+import sys
 from pathlib import Path
 import json
-from tkinter.font import BOLD
-from tkinter.ttk import Style
 
 from rich.console import Console, Group
 
 from displaying.reviw import build_event_review_view, build_atomic_runs_view
 from displaying.table import build_report_metadata_view
-from handlers import correlation
 from handlers.correlation import (
-    collect_process_candidates,
     correlate_processes, 
-    link_atomic_runs, 
-    find_root_candidates,
-    collect_process_candidates)
+    link_atomic_runs)
 from handlers.events import process_events, config_handler
 from handlers.file_handlers import (
     load_csv_file,
@@ -25,11 +19,16 @@ from handlers.file_handlers import (
 )
 from handlers.matching import report_handler
 from reporting.report import build_rule_report, save_report_json
+from scripts.check_live_run import run_live_session
 
 def main():
-    project_dir = Path(__file__).resolve().parent
+    if getattr(sys, 'frozen', False):
+        project_dir = Path(sys.executable).resolve().parent
+    else:
+        project_dir = Path(__file__).resolve().parent
 
     parser = argparse.ArgumentParser(description="Read Sigma rule yaml file")
+    source_group = parser.add_mutually_exclusive_group ()
 
     parser.add_argument(
         "--rule",
@@ -37,10 +36,15 @@ def main():
         type=Path,
         help="Path to sigma .yaml",
     )
-    parser.add_argument(
+    source_group.add_argument(
         "--session",
         type=Path,
         help="Path to a saved session directory"
+    )
+    source_group.add_argument(
+        "--live",
+        action="store_true",
+        help="Run auto test and evaluate collected events",
     )
     parser.add_argument(
         "--execution-log",
@@ -52,8 +56,40 @@ def main():
         action="store_true",
         help="Show detailed correlation information",
     )
+    parser.add_argument(
+        "--atomic-test",
+        nargs=2,
+        metavar=("TECHNIQUE", "TEST_NUMBER"),
+        help="Specify the Atomic Red Team technique and test number to run",
+    )
 
     args = parser.parse_args()
+
+    if args.atomic_test is not None and not args.live:
+        parser.error("--atomic-test requires --live")
+
+    if args.execution_log is not None and args.session is None:
+        parser.error("--execution-log requires --session")
+
+    technique = None
+    test_number = None
+
+    if args.live:
+        if args.atomic_test is None:
+            parser.error("--live requires --atomic-test TECHNIQUE TEST_NUMBER")
+
+        technique, raw_test_number = args.atomic_test
+        technique = technique.strip().upper()
+
+        try:
+            test_number = int(raw_test_number)
+        except ValueError:
+            parser.error(f"Invalid test number: {raw_test_number}")
+
+        if not 1 <= test_number <= 2147483647:
+            parser.error(
+                f"Test number must be between 1 and 2147483647: {test_number}"
+            )
 
     if not args.rule.is_file():
         parser.error(f"Sigma rule file not found: {args.rule}")
@@ -124,32 +160,28 @@ def main():
             )
 
         at_run = matching_runs[0]
-
         correlation = correlate_processes(at_run, events)
 
+    elif args.live:
+        live_session = run_live_session(technique, test_number)
+
+        events = live_session["events"]
+        scenario = live_session["scenario"]
+        at_run = live_session["atomic_run"]
+        correlation = live_session["correlation"]
+
+    else:
+        raw_xml = load_xml_file(str(project_dir / configuration["events"]["file_path"]))
+        events = process_events(raw_xml, configuration)
+        atomic_log = load_csv_file(str(project_dir / configuration["atomic"]["log_path"]))
+        linked_runs = link_atomic_runs(atomic_log, events, configuration["correlation"])
+
+    if args.session is not None or args.live:
         correlation_status = correlation["correlation_status"]
         root_candidates = correlation["root_candidates"]
         root_evidence = correlation["root_evidence"]
         process_candidates = correlation["process_candidates"]
         process_evidence = correlation["process_evidence"]
-
-        # root_candidates, root_evidence = find_root_candidates(at_run, events)
-
-        # process_candidates = []
-        # process_evidence = []
-
-        # if not root_candidates:
-        #     correlation_status = "root_not_found"
-
-        # elif len(root_candidates) == 1:
-        #     process_candidates, process_evidence = collect_process_candidates(
-        #         root_candidates[0],
-        #     events
-        #     )
-
-        #     correlation_status = "candidates_collected"
-        # else:
-        #     correlation_status = "multiple_root_candidates"
 
         if args.show_correlation:
             print("Correlation")
@@ -158,7 +190,6 @@ def main():
             print("Process candidates:", len(process_candidates))
             print("Root candidates:", len(root_candidates))
             print("Atomic test:", at_run["Test Name"])
-            print("Execution records:", len(execution_rows))
             print("Run ID:", scenario["run_id"])
             print("Scenario status:", scenario["status"])
 
@@ -176,13 +207,7 @@ def main():
                 "correlation_issues": [],
             }
         ]
-
-    else:
-        raw_xml = load_xml_file(str(project_dir / configuration["events"]["file_path"]))
-        events = process_events(raw_xml, configuration)
-        atomic_log = load_csv_file(str(project_dir / configuration["atomic"]["log_path"]))
-        linked_runs = link_atomic_runs(atomic_log, events, configuration["correlation"])
-
+        
     event_results = report_handler(events, sigma_rule)
     report = build_rule_report(sigma_rule, event_results, linked_runs)
 

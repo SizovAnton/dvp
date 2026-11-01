@@ -8,9 +8,22 @@ def run_scenario(command):
     results = subprocess.run(command, capture_output=True, text=True, encoding="utf-8")
 
     if results.returncode != 0:
-        raise RuntimeError(f"Scenario execution not succeed; Exit code {results.returncode}")
+        details = results.stderr.strip()
+        if not details:
+            details = "No diagnostic message was returned."
 
-    execution_results = json.loads(results.stdout)
+        raise RuntimeError(f"Scenario execution not succeed; Exit code {results.returncode}: {details}")
+
+    try:
+        execution_results = json.loads(results.stdout)
+    except json.JSONDecodeError as error:
+
+        raise RuntimeError(
+            "PowerShell returned an invalid JSON response. "
+            f"Exit code: {results.returncode}; "
+            f"stdout: {results.stdout[:2000]!r}; "
+            f"stderr: {results.stderr[:2000]!r}"
+        ) from error
 
     if not isinstance(execution_results, dict):
         raise ValueError("Scenario response must be a JSON object")

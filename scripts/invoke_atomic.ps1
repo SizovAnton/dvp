@@ -12,8 +12,8 @@ param(
     [string]$Technique,
 
     [Parameter(Mandatory = $true)]
-    [ValidateNotNullOrEmpty()]
-    [string]$TestGuid
+    [ValidateRange(1, 2147483647)]
+    [int]$TestNumber
 )
 
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
@@ -29,6 +29,38 @@ try {
 
     Import-Module -Name $ModulePath -ErrorAction Stop
     $null = Get-Command -Name "Invoke-AtomicTest" -ErrorAction Stop
+
+    $techniqueDirectory = Join-Path -Path $AtomicPath $Technique
+    $techniquePath = Join-Path -Path $techniqueDirectory "$Technique.yaml"
+
+    if (-not (Test-Path -LiteralPath $techniquePath -PathType Leaf)) {
+        throw "Technique definition not found: $techniquePath"
+    }
+
+    $definition = Get-AtomicTechnique `
+        -Path $techniquePath `
+        -ErrorAction Stop `
+        -WarningAction SilentlyContinue `
+        -WarningVariable definitionWarnings
+
+  
+    foreach ($warning in $definitionWarnings) {
+        [Console]::Error.WriteLine("WARNING: {0}", $warning.Message)
+    }
+
+    if ($null -eq $definition) {
+        throw "Could not read technique definition: $Technique"
+    }
+
+    $testCount = $definition.atomic_tests.Count
+
+    if ($testCount -lt 1) {
+        throw "Technique $Technique contains no tests"
+    }
+
+    if ($TestNumber -gt $testCount) {
+        throw "test $TestNumber does not exist for $Technique. Available test numbers: 1-$testCount."
+    }
 
     $runId = [guid]::NewGuid().ToString()
     $runsRoot = Join-Path -Path $PSScriptRoot -ChildPath 'runs'
@@ -50,7 +82,7 @@ try {
 
     Invoke-AtomicTest `
         -AtomicTechnique $Technique `
-        -TestGuids $TestGuid `
+        -TestNumbers $TestNumber `
         -PathToAtomicsFolder $AtomicPath `
         -LoggingModule "Default-ExecutionLogger" `
         -ExecutionLogPath $executionLogPath `
@@ -65,7 +97,7 @@ try {
 
     $matchingRuns = @(
         $rows | Where-Object {
-            $_.GUID -eq $TestGuid -and
+            $_.'Test Number' -eq [string]$TestNumber -and
             $_.Technique -eq $Technique
         }
     )
@@ -88,7 +120,8 @@ try {
         status         = "succeeded"
         run_id         = $runId
         technique      = $Technique
-        test_guid      = $TestGuid
+        test_number    = $TestNumber
+        test_guid      = $testRun.GUID
         exit_code      = $testExitCode
         execution_log  = $executionLogPath
         diagnostic_log = $diagnosticLogPath
