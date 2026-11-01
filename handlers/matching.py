@@ -143,7 +143,7 @@ def report_handler(items, sigma_rule):
 
         res = {
             "Log Record ID" : item["record_id"],
-            "Run Reference" : item["run_reference"],
+            "Run Reference" : item.get("run_reference"),
             "Logsource" : source_check,
             "Event Context" : {
                 "Computer" : item["computer"],

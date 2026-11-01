@@ -15,11 +15,14 @@ def add_checks_rows(table, checks, group_reference):
                 Text(details),
             )
 
-def build_report_metadata_view(report):
+def build_report_metadata_view(report, show_correlation=False):
     sections = []
 
     for name, value in report.items():
         if name in ("Event Review", "Check Summary", "Atomic Runs"):
+            continue
+
+        if name == "Correlation Issues" and not show_correlation:
             continue
 
         sections.append(

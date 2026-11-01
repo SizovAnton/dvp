@@ -1,5 +1,8 @@
 """Зіставлення запусків Atomic Red Team із подіями."""
 
+from logging import root
+from tabnanny import check
+
 from handlers.events import parse_event_time
 
 def link_atomic_runs(at_runs, events, correlation_config):
@@ -70,6 +73,7 @@ def get_items(linked_runs):
 
 def find_root_candidates(at_run, events):
     candidates = []
+    evidence = []
 
     prepared_hostname = at_run.get("Hostname")
 
@@ -135,10 +139,29 @@ def find_root_candidates(at_run, events):
         if event_pid == process_id:
             candidates.append(event)
 
-    return candidates
+            evidence.append({
+                "record_id": event["record_id"],
+                "method": "host_pid",
+                "checks": {
+                    "computer" :{
+                        "run_value": hostname,
+                        "event_value": computer,
+                    },
+                    "pid": {
+                        "run_value": process_id,
+                        "event_value": event_pid,
+                        "event_field": field_name,
+                        "event_base": pid_base,
+                    },
+                },
+                "limitations": ["pid_reuse_not_excluded"]
+            })
+
+    return candidates, evidence
 
 def find_child_candidates(parent_event, events):
     candidates = []
+    evidence = []
 
     raw_computer = parent_event.get("computer")
 
@@ -219,9 +242,9 @@ def find_child_candidates(parent_event, events):
 
         if event_profile is None:
             continue
-        else: 
-            if not isinstance(event_profile, dict):
-                raise ValueError("...")
+         
+        if not isinstance(event_profile, dict):
+            raise ValueError("Event process_creation must be a dictionary")
 
         event_expected_id = event_profile.get("event_id")
         
@@ -229,12 +252,6 @@ def find_child_candidates(parent_event, events):
             raise ValueError("Event process_creation.event_id must be a non-empty string")
 
         if event.get("event_id") != event_expected_id:
-            continue
-        
-        if event_profile["event_id"] is None:
-            raise ValueError("...")
-
-        if event_profile["event_id"] != event.get("event_id"):
             continue
 
         raw_event_computer = event.get("computer")
@@ -251,15 +268,155 @@ def find_child_candidates(parent_event, events):
         if event_time is None or event_time < parent_time:
             continue
 
+        common_checks = {
+            "computer": {
+                "parent_value": computer,
+                "child_value": event_computer,
+            },
+            "time": {
+                "parent_value": parent_time.isoformat(),
+                "child_value": event_time.isoformat(),
+                "condition": "child_time >= parent_time"
+            }
+        }
+
         event_fields = event.get("data_fields")
 
         if not isinstance(event_fields, dict):
             continue
 
-        parent_gui_field = event_profile.get("parent_guid_field")
-
+        parent_guid_field = event_profile.get("parent_guid_field")
         event_parent_guid = None
 
-        if event_parent_guid is not None:
-            if not isinstance(event_parent_guid, str) or not event_parent_guid.strip():
-                raise ValueError("...")
+        if parent_guid_field is not None:
+            if not isinstance(parent_guid_field, str) or not parent_guid_field.strip():
+                raise ValueError("process_creation.parent_guid_field must be a non-empty string or null")
+
+            raw_parent_guid = event_fields.get(parent_guid_field)
+
+            if isinstance(raw_parent_guid, str) and raw_parent_guid.strip():
+                event_parent_guid = raw_parent_guid.strip().casefold()
+
+        if process_guid is not None and event_parent_guid is not None:
+            if process_guid == event_parent_guid:
+                candidates.append(event)
+
+                evidence.append({
+                    "parent_record_id": parent_event["record_id"],
+                    "child_record_id": event["record_id"],
+                    "method": "process_guid",
+                    "checks": {
+                        **common_checks,
+                        "guid": {
+                            "parent_value": process_guid,
+                            "parent_field": guid_field,
+                            "child_parent_value": event_parent_guid,
+                            "child_parent_field": parent_guid_field,
+                        },
+                    },
+                })
+
+            continue
+
+        parent_pid_field_name = event_profile.get("parent_pid_field")
+    
+        if not isinstance(parent_pid_field_name, str) or not parent_pid_field_name.strip():
+            raise ValueError("process_creation.parent_pid_field must be a non-empty string")
+    
+        parent_pid_base = event_profile.get("parent_pid_base")
+    
+        if type(parent_pid_base) is not int or not 2 <= parent_pid_base <= 36:
+            raise ValueError("process_creation.parent_pid_base must be an integer from 2 to 36")
+
+        raw_parent_pid = event_fields.get(parent_pid_field_name)
+    
+        if not isinstance(raw_parent_pid, str) or not raw_parent_pid.strip():
+            continue
+    
+        try:
+            event_parent_pid = int(raw_parent_pid.strip(), parent_pid_base)
+        except:
+            continue
+    
+        if event_parent_pid == process_pid:
+            candidates.append(event)
+
+            evidence.append({
+                "parent_record_id": parent_event["record_id"],
+                "child_record_id": event["record_id"],
+                "method": "process_pid",
+                "fallback_reason": "guid_pair_unavailable",
+                "checks": {
+                    **common_checks,
+                    "pid": {
+                        "parent_value": process_pid,
+                        "parent_field": pid_field_name,
+                        "parent_base": pid_base,
+
+                        "child_parent_value": event_parent_pid,
+                        "child_parent_field": parent_pid_field_name,
+                        "child_parent_base": parent_pid_base,
+                    },
+                },
+
+                "limitations": ["pid_reuse_not_excluded"],
+            })
+
+    return candidates, evidence
+
+def collect_process_candidates(root_event, events):
+    root_record_id = root_event.get("record_id")
+
+    if not isinstance(root_record_id, str) or not root_record_id.strip():
+        raise ValueError("Root event record_id must be a non-empty string")
+
+    result = []
+    process_evidence = []
+    pending = [root_event]
+    seen = {root_record_id}
+
+    while pending:
+        current = pending.pop()
+        result.append(current)
+
+        children, child_evidence = find_child_candidates(current, events)
+        process_evidence.extend(child_evidence)
+
+        for child in children:
+            child_record_id = child.get("record_id")
+
+            if not isinstance(child_record_id, str) or not child_record_id.strip():
+                raise ValueError("Child event record_id must be a non-empty string")
+
+            if child_record_id in seen:
+                continue
+
+            seen.add(child_record_id)
+            pending.append(child)
+
+    return result, process_evidence
+
+def correlate_processes(at_run, events):
+    root_candidates, root_evidence = find_root_candidates(at_run, events)
+
+    process_candidates = []
+    process_evidence = []
+
+    if not root_candidates:
+        correlation_status = "root_not_found"
+    elif len(root_candidates) == 1:
+        process_candidates, process_evidence = collect_process_candidates(
+            root_candidates[0],
+            events
+        )
+        correlation_status = "candidates_collected"
+    else:
+        correlation_status = "multiple_root_candidates"
+
+    return {
+        "correlation_status": correlation_status,
+        "root_candidates": root_candidates,
+        "root_evidence": root_evidence,
+        "process_candidates": process_candidates,
+        "process_evidence": process_evidence,
+    }

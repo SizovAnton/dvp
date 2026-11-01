@@ -1,0 +1,627 @@
+{
+  "session_id": "be7684ef-0cf8-41cb-be4a-29384ba61251",
+  "run_id": "1f64dbbc-62fa-43b0-862a-5455f4b4b6c1",
+  "status": "candidates_collected",
+  "root_candidates": [
+    {
+      "record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:37.955448500Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:37.954",
+        "ProcessGuid": "{5EF3D573-4989-6AE7-3E01-000000001B00}",
+        "ProcessId": "1128",
+        "Image": "C:\\Windows\\System32\\cmd.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Windows Command Processor",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "Cmd.Exe",
+        "CommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=F4F684066175B77E0C3A000549D2922C,SHA256=935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2,IMPHASH=3062ED732D4B25D1C64F084DAC97D37A",
+        "ParentProcessGuid": "{5EF3D573-4988-6AE7-3601-000000001B00}",
+        "ParentProcessId": "4872",
+        "ParentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "ParentCommandLine": "powershell.exe -NoProfile -NonInteractive -File \"C:\\Test Env\\dvp-live-check\\scripts\\invoke_atomic.ps1\" -ModulePath C:\\AtomicRedTeam\\invoke-atomicredteam\\Invoke-AtomicRedTeam.psd1 -AtomicPath C:\\AtomicRedTeam\\atomics -Technique T1087.001 -TestGuid 80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    }
+  ],
+  "process_candidates": [
+    {
+      "record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:37.955448500Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:37.954",
+        "ProcessGuid": "{5EF3D573-4989-6AE7-3E01-000000001B00}",
+        "ProcessId": "1128",
+        "Image": "C:\\Windows\\System32\\cmd.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Windows Command Processor",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "Cmd.Exe",
+        "CommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=F4F684066175B77E0C3A000549D2922C,SHA256=935C1861DF1F4018D698E8B65ABFA02D7E9037D8F68CA3C2065B6CA165D44AD2,IMPHASH=3062ED732D4B25D1C64F084DAC97D37A",
+        "ParentProcessGuid": "{5EF3D573-4988-6AE7-3601-000000001B00}",
+        "ParentProcessId": "4872",
+        "ParentImage": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+        "ParentCommandLine": "powershell.exe -NoProfile -NonInteractive -File \"C:\\Test Env\\dvp-live-check\\scripts\\invoke_atomic.ps1\" -ModulePath C:\\AtomicRedTeam\\invoke-atomicredteam\\Invoke-AtomicRedTeam.psd1 -AtomicPath C:\\AtomicRedTeam\\atomics -Technique T1087.001 -TestGuid 80887bec-5a9b-4efc-a81d-f83eb2eb32ab",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "244b8af4-6002-4cc6-81ba-fe71ad03b04c",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:38.051775700Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:38.051",
+        "ProcessGuid": "{5EF3D573-498A-6AE7-4501-000000001B00}",
+        "ProcessId": "1380",
+        "Image": "C:\\Windows\\System32\\net.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Net Command",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "net.exe",
+        "CommandLine": "net  localgroup",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468",
+        "ParentProcessGuid": "{5EF3D573-4989-6AE7-3E01-000000001B00}",
+        "ParentProcessId": "1128",
+        "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+        "ParentCommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "af04e2cd-f2a5-465d-a678-7abaf8dc151e",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:38.056177200Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:38.055",
+        "ProcessGuid": "{5EF3D573-498A-6AE7-4601-000000001B00}",
+        "ProcessId": "76",
+        "Image": "C:\\Windows\\System32\\net1.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Net Command",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "net1.exe",
+        "CommandLine": "C:\\Windows\\system32\\net1  localgroup",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=946383ED00F5CD92DBCB7CDB878ED819,SHA256=E92A2FA67AD2F7367ABA1ABF237D245B5E36291C5A4A9F0FC04B3A0E32FF618E,IMPHASH=E2F26A4CA577CF6DBACE937727934F80",
+        "ParentProcessGuid": "{5EF3D573-498A-6AE7-4501-000000001B00}",
+        "ParentProcessId": "1380",
+        "ParentImage": "C:\\Windows\\System32\\net.exe",
+        "ParentCommandLine": "net  localgroup",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "d975433c-63a7-4e2a-b9d9-460a0794ff45",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:38.036181400Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:38.035",
+        "ProcessGuid": "{5EF3D573-498A-6AE7-4301-000000001B00}",
+        "ProcessId": "4648",
+        "Image": "C:\\Windows\\System32\\net.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Net Command",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "net.exe",
+        "CommandLine": "net  localgroup \"Users\" ",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468",
+        "ParentProcessGuid": "{5EF3D573-4989-6AE7-3E01-000000001B00}",
+        "ParentProcessId": "1128",
+        "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+        "ParentCommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "0ddb05bf-44ea-40a9-8158-bf0df88b1c1b",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:38.040805300Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:38.039",
+        "ProcessGuid": "{5EF3D573-498A-6AE7-4401-000000001B00}",
+        "ProcessId": "1716",
+        "Image": "C:\\Windows\\System32\\net1.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Net Command",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "net1.exe",
+        "CommandLine": "C:\\Windows\\system32\\net1  localgroup \"Users\" ",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=946383ED00F5CD92DBCB7CDB878ED819,SHA256=E92A2FA67AD2F7367ABA1ABF237D245B5E36291C5A4A9F0FC04B3A0E32FF618E,IMPHASH=E2F26A4CA577CF6DBACE937727934F80",
+        "ParentProcessGuid": "{5EF3D573-498A-6AE7-4301-000000001B00}",
+        "ParentProcessId": "4648",
+        "ParentImage": "C:\\Windows\\System32\\net.exe",
+        "ParentCommandLine": "net  localgroup \"Users\" ",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "61c0dcf9-5f48-46c8-9acc-c4a6a8b08351",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:38.029986500Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:38.028",
+        "ProcessGuid": "{5EF3D573-498A-6AE7-4201-000000001B00}",
+        "ProcessId": "1732",
+        "Image": "C:\\Windows\\System32\\cmdkey.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Credential Manager Command Line Utility",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "cmdkey.exe",
+        "CommandLine": "cmdkey.exe  /list ",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=A1EE80FA467F1D39431125552BBB0ED2,SHA256=03A6C3CCC826816063AA611FF763C431C4C4FEDE47979CD3892C2AACFD046904,IMPHASH=02CCF792E6FC0981B34A77557B081489",
+        "ParentProcessGuid": "{5EF3D573-4989-6AE7-3E01-000000001B00}",
+        "ParentProcessId": "1128",
+        "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+        "ParentCommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "5384b146-b1dc-4276-b761-a5011e3744b5",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:37.973111800Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:37.970",
+        "ProcessGuid": "{5EF3D573-4989-6AE7-4001-000000001B00}",
+        "ProcessId": "608",
+        "Image": "C:\\Windows\\System32\\net.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Net Command",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "net.exe",
+        "CommandLine": "net  user ",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=9B1E2A711EA151F766EA24389E2D4442,SHA256=7D76325D4092C9C9FE48B36C275C0255E461D8197A7960DF35DFBC270A9C6613,IMPHASH=C41B15F592DE4589047CE5119CE87468",
+        "ParentProcessGuid": "{5EF3D573-4989-6AE7-3E01-000000001B00}",
+        "ParentProcessId": "1128",
+        "ParentImage": "C:\\Windows\\System32\\cmd.exe",
+        "ParentCommandLine": "\"cmd.exe\" /c net user & dir c:\\Users\\ & cmdkey.exe /list & net localgroup \"Users\" & net localgroup",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "record_id": "6a924742-0ff1-44a7-8c46-dd8ae57791bc",
+      "event_id": "1",
+      "computer": "WIN-5D606EQID5C.corp.local",
+      "system_time": "2026-11-01T14:15:37.984876700Z",
+      "data_fields": {
+        "RuleName": "-",
+        "UtcTime": "2026-11-01 14:15:37.980",
+        "ProcessGuid": "{5EF3D573-4989-6AE7-4101-000000001B00}",
+        "ProcessId": "1680",
+        "Image": "C:\\Windows\\System32\\net1.exe",
+        "FileVersion": "10.0.14393.0 (rs1_release.160715-1616)",
+        "Description": "Net Command",
+        "Product": "Microsoft® Windows® Operating System",
+        "Company": "Microsoft Corporation",
+        "OriginalFileName": "net1.exe",
+        "CommandLine": "C:\\Windows\\system32\\net1  user ",
+        "CurrentDirectory": "C:\\Users\\ADMINI~1\\AppData\\Local\\Temp\\",
+        "User": "CORP\\Administrator",
+        "LogonGuid": "{5EF3D573-E9F8-6AE5-4D8E-030000000000}",
+        "LogonId": "0x38e4d",
+        "TerminalSessionId": "1",
+        "IntegrityLevel": "High",
+        "Hashes": "MD5=946383ED00F5CD92DBCB7CDB878ED819,SHA256=E92A2FA67AD2F7367ABA1ABF237D245B5E36291C5A4A9F0FC04B3A0E32FF618E,IMPHASH=E2F26A4CA577CF6DBACE937727934F80",
+        "ParentProcessGuid": "{5EF3D573-4989-6AE7-4001-000000001B00}",
+        "ParentProcessId": "608",
+        "ParentImage": "C:\\Windows\\System32\\net.exe",
+        "ParentCommandLine": "net  user ",
+        "ParentUser": "CORP\\Administrator"
+      },
+      "channel": "Microsoft-Windows-Sysmon/Operational",
+      "provider": "Microsoft-Windows-Sysmon",
+      "source": {
+        "channel": "Microsoft-Windows-Sysmon/Operational",
+        "provider": "Microsoft-Windows-Sysmon",
+        "description": "Windows Sysmon",
+        "product": "windows",
+        "service": "sysmon",
+        "process_creation": {
+          "event_id": "1",
+          "pid_field": "ProcessId",
+          "pid_base": 10,
+          "parent_pid_field": "ParentProcessId",
+          "parent_pid_base": 10,
+          "guid_field": "ProcessGuid",
+          "parent_guid_field": "ParentProcessGuid"
+        }
+      }
+    }
+  ],
+  "root_evidence": [
+    {
+      "record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "method": "host_pid",
+      "checks": {
+        "computer": {
+          "run_value": "win-5d606eqid5c",
+          "event_value": "win-5d606eqid5c"
+        },
+        "pid": {
+          "run_value": 1128,
+          "event_value": 1128,
+          "event_field": "ProcessId",
+          "event_base": 10
+        }
+      },
+      "limitations": [
+        "pid_reuse_not_excluded"
+      ]
+    }
+  ],
+  "process_evidence": [
+    {
+      "parent_record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "child_record_id": "5384b146-b1dc-4276-b761-a5011e3744b5",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:37.955448+00:00",
+          "child_value": "2026-11-01T14:15:37.973111+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "parent_record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "child_record_id": "61c0dcf9-5f48-46c8-9acc-c4a6a8b08351",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:37.955448+00:00",
+          "child_value": "2026-11-01T14:15:38.029986+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "parent_record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "child_record_id": "d975433c-63a7-4e2a-b9d9-460a0794ff45",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:37.955448+00:00",
+          "child_value": "2026-11-01T14:15:38.036181+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "parent_record_id": "641bc514-f5e4-48f7-88cd-a45f52b76278",
+      "child_record_id": "244b8af4-6002-4cc6-81ba-fe71ad03b04c",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:37.955448+00:00",
+          "child_value": "2026-11-01T14:15:38.051775+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-4989-6ae7-3e01-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "parent_record_id": "244b8af4-6002-4cc6-81ba-fe71ad03b04c",
+      "child_record_id": "af04e2cd-f2a5-465d-a678-7abaf8dc151e",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:38.051775+00:00",
+          "child_value": "2026-11-01T14:15:38.056177+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-498a-6ae7-4501-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-498a-6ae7-4501-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "parent_record_id": "d975433c-63a7-4e2a-b9d9-460a0794ff45",
+      "child_record_id": "0ddb05bf-44ea-40a9-8158-bf0df88b1c1b",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:38.036181+00:00",
+          "child_value": "2026-11-01T14:15:38.040805+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-498a-6ae7-4301-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-498a-6ae7-4301-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    },
+    {
+      "parent_record_id": "5384b146-b1dc-4276-b761-a5011e3744b5",
+      "child_record_id": "6a924742-0ff1-44a7-8c46-dd8ae57791bc",
+      "method": "process_guid",
+      "checks": {
+        "computer": {
+          "parent_value": "win-5d606eqid5c",
+          "child_value": "win-5d606eqid5c"
+        },
+        "time": {
+          "parent_value": "2026-11-01T14:15:37.973111+00:00",
+          "child_value": "2026-11-01T14:15:37.984876+00:00",
+          "condition": "child_time >= parent_time"
+        },
+        "guid": {
+          "parent_value": "{5ef3d573-4989-6ae7-4001-000000001b00}",
+          "parent_field": "ProcessGuid",
+          "child_parent_value": "{5ef3d573-4989-6ae7-4001-000000001b00}",
+          "child_parent_field": "ParentProcessGuid"
+        }
+      }
+    }
+  ]
+}

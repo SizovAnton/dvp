@@ -239,6 +239,10 @@ def summaries_atomic_run(linked_runs, report_events):
         "Run Reference": run["run_reference"],
         "Atomic Run": run["atomic_run"],
         "Candidate Events": len(run["candidate_events"]),
+        "Correlation Status": run.get("correlation_status", "not_recorded"),
+        "Root Candidate IDs": run.get("root_candidate_ids"),
+        "Root Correlation Evidence": run.get("root_evidence"),
+        "Process Correlation Evidence": run.get("process_evidence"),
         "Events Summary": {
             "Total Events": 0,
             "Match": 0,
@@ -249,18 +253,48 @@ def summaries_atomic_run(linked_runs, report_events):
         "Correlation Issues": run["correlation_issues"],
     }
 
-    for result in report_events:
-        run_summary = summaries[result["Run Reference"]]
-        run_summary["Events Summary"]["Total Events"] += 1
+    for run in linked_runs:
+        candidate_ids = {
+            event["record_id"] for 
+            event in run["candidate_events"]
+        }
 
-        if result["Selection"] is True:
-            category = "Match"
-        elif result["Selection"] is False:
-            category = "Unmatch"
-        else:
-            category = "Skipped"
+        run_summary = summaries[run["run_reference"]]
 
-        run_summary["Events Summary"][category] += 1
-        run_summary["Event References"].append(result["Event Reference"])
+        for result in report_events:
+            if result["Log Record ID"] not in candidate_ids:
+                continue
+
+            run_summary["Events Summary"]["Total Events"] += 1
+
+            if result["Selection"] is True:
+                category = "Match"
+            elif result["Selection"] is False:
+                category = "Unmatch"
+            else:
+                category = "Skipped"
+
+            run_summary["Events Summary"][category] += 1
+            run_summary["Event References"].append(result["Event Reference"])
+
+            
+
+
+    # for result in report_events:
+    #     if result["Run Reference"] is None:
+    #         continue
+
+    #     run_summary = summaries[result["Run Reference"]]
+    #     run_summary["Events Summary"]["Total Events"] += 1
+
+    #     if result["Selection"] is True:
+    #         category = "Match"
+    #     elif result["Selection"] is False:
+    #         category = "Unmatch"
+    #     else:
+    #         category = "Skipped"
+
+    #     run_summary["Events Summary"][category] += 1
+    #     run_summary["Event References"].append(result["Event Reference"])
 
     return list(summaries.values())

@@ -1,9 +1,10 @@
 import csv
+from pathlib import Path
 import xml.etree.ElementTree as ET
 import yaml
 import json
 
-def load_csv_file(path: str):
+def load_csv_file(path: str | Path):
 
     with open(path, encoding="utf-8", newline="") as file:
         reader = csv.DictReader(file)

@@ -4,11 +4,12 @@ import xml.etree.ElementTree as ET
 import sys 
 from pathlib import Path
 from uuid import uuid4
-
 from concurrent.futures import ThreadPoolExecutor
+
 from handlers.events import process_events
 from scripts.check_atomic import run_scenario
-from handlers.file_handlers import load_configuration
+from handlers.file_handlers import load_configuration, load_csv_file
+from handlers.correlation import correlate_processes
 
 
 
@@ -199,6 +200,62 @@ def main():
     output_scenario = session_dir / "scenario.json"
     with output_scenario.open("w", encoding="utf-8") as output_scenario_file:
         json.dump(execution_results, output_scenario_file, ensure_ascii=False, indent=2)
+
+    execution_log_path = Path(execution_results["execution_log"])
+
+    if not execution_log_path.is_file():
+        raise FileNotFoundError(f"Execution log not found: {execution_log_path}")
+
+    execution_rows = load_csv_file(execution_log_path)
+    matching_runs = []
+
+    for row in execution_rows:
+        if row.get("GUID") == execution_results["test_guid"] and row.get("Technique") == execution_results["technique"]:
+            matching_runs.append(row)
+
+    if len(matching_runs) != 1:
+        raise RuntimeError(f"Expected one matching execution record; found {len(matching_runs)}")
+
+    at_run = matching_runs[0]
+
+    correlation = correlate_processes(at_run, collected_events)
+
+    correlation_status = correlation["correlation_status"]
+    root_candidates = correlation["root_candidates"]
+    root_evidence = correlation["root_evidence"]
+    process_candidates = correlation["process_candidates"]
+    process_evidence = correlation["process_evidence"]
+
+    # root_candidates, root_evidence = find_root_candidates(at_run, collected_events)
+    # process_candidates = []
+    # process_evidence = []
+
+    # if not root_candidates:
+    #     correlation_status = "root_not_found"
+    # elif len(root_candidates) == 1:
+    #     process_candidates, process_evidence = collect_process_candidates(root_candidates[0], collected_events)
+    #     correlation_status = "candidates_collected"
+    # else: 
+    #     correlation_status = "multiple_root_candidates"
+
+    correlation_result = {
+        "session_id" : session_id,
+        "run_id" : execution_results["run_id"],
+        "status" : correlation_status,
+        "root_candidates" : root_candidates,
+        "process_candidates" : process_candidates,
+        "root_evidence": root_evidence,
+        "process_evidence": process_evidence,
+    }
+
+    output_correlation = session_dir / "process_correlation.json"
+    with output_correlation.open("w", encoding="utf-8") as output_correlation_file:
+        json.dump(correlation_result, output_correlation_file, ensure_ascii=False, indent=2)
+
+    print("Correlation status:", correlation_status)
+    print("Root candidates:", len(root_candidates))
+    print("Process candidates:", len(process_candidates))
+    
     
     print("Scenario status:", execution_results["status"])
     print("Run ID:", execution_results["run_id"])
