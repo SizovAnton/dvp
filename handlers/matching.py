@@ -163,3 +163,73 @@ def report_handler(items, sigma_rule):
         results.append(res)
 
     return results
+
+def validate_rule(sigma_rule):
+    logsource = sigma_rule.get("logsource")
+    detection = sigma_rule.get("detection")
+
+    if not isinstance(logsource, dict) or not logsource:
+        raise ValueError("Document logsource must be a non-empty dictionary")
+
+    if not isinstance(detection, dict) or not detection:
+        raise ValueError("Document detection must be a non-empty dictionary")
+
+    condition = detection.get("condition")
+
+    if not isinstance(condition, str) or not condition.split():
+        raise ValueError("Document detection condition must be a non-empty string")
+
+    tree = prepare_condition(detection, parse_condition, collect_references)
+    references = collect_references(tree)
+
+    for block_name in sorted(references):
+        block = detection[block_name]
+
+        if not isinstance(block, dict) or not block:
+            raise ValueError(
+                f"Detection block {block_name!r} must be a non-empty dictionary"
+            )
+
+        for rule_key, expected in block.items():
+            if not isinstance(rule_key, str) or not rule_key.split():
+                raise ValueError(
+                    f"Detection block {block_name!r} contains an invalid rule key: {rule_key!r}"
+                )
+            
+            parts = rule_key.split("|")
+            field = parts[0]
+            modifiers = parts[1:]
+
+            if not field.strip():
+                raise ValueError(
+                    f"Detection block {block_name!r} contains an invalid rule key: {rule_key!r}"
+                )
+
+            if modifiers not in ([], ["endswith"], ["contains"]):
+                raise ValueError(
+                    f"Unsupported modifiers in block {block_name!r}, "
+                    f"field {field!r}: {modifiers!r}"
+                )
+
+            expected_values = expected if isinstance(expected, list) else [expected]
+
+            if not expected_values:
+                raise ValueError(
+                    f"Expected values must not be empty: "
+                    f"block {block_name!r}, field {rule_key!r}"
+                )
+
+            for value in expected_values:
+                if modifiers:
+                    valid_type = isinstance(value, str)
+                else:
+                    valid_type = type(value) in (str, int)
+
+                if not valid_type:
+                    raise ValueError(
+                        f"Unsupported value in block {block_name!r}, "
+                        f"field {rule_key!r}: {value!r}"
+                    )
+
+                
+        

@@ -17,7 +17,7 @@ from handlers.file_handlers import (
     load_xml_file,
     load_configuration
 )
-from handlers.matching import report_handler
+from handlers.matching import report_handler, validate_rule
 from reporting.report import build_rule_report, save_report_json
 from scripts.check_live_run import run_live_session
 
@@ -104,6 +104,11 @@ def main():
             parser.error(f"Session events file not found: {events_path}")
 
     sigma_rule = load_sigma_rule(args.rule)
+
+    try:
+        validate_rule(sigma_rule)
+    except ValueError as e:
+        parser.error(f"Unsupported or invalid Sigma rule: {e}")
 
     configuration = load_configuration(
         project_dir / "config" / "default.config",
