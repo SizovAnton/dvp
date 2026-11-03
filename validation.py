@@ -10,7 +10,7 @@ def validate_results(result: dict) -> None:
 
     if not isinstance(result, dict):
             raise ValueError("Result must be a dictionary.")
-    
+
     for key in required_fields:
         if key not in result:
             raise ValueError(f"Missing '{key}' key in result.")

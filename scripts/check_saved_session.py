@@ -27,8 +27,8 @@ def main():
     print("Кількість подій:", len(events))
     print("Правило:", rule["title"])
 
-    
-    
+
+
 
 
 

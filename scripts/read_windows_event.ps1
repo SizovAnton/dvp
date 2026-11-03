@@ -12,9 +12,9 @@ try {
 }
 catch {
     [Console]::Error.WriteLine(
-    "Failed to read event log '{0}': {1}",
-    $LogName,
-    $_.Exception.Message
-)
+        "Failed to read event log '{0}': {1}",
+        $LogName,
+        $_.Exception.Message
+    )
     exit 1
 }

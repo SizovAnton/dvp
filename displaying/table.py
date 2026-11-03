@@ -45,7 +45,7 @@ def format_detail_value(value, indent=0):
     if isinstance(value, dict):
         if not value:
             return [prefix + "{}"]
-        
+
         for key, nested_value in value.items():
             simple_list = (
                 isinstance(nested_value, list)
@@ -64,15 +64,15 @@ def format_detail_value(value, indent=0):
             return [prefix + repr(value)]
         if all(not isinstance(item, (dict, list)) for item in value):
             return [prefix + repr(value)]
-        
+
         for number, item in enumerate(value, start=1):
             if isinstance(item, (dict, list)):
                 rows.append(f"{prefix}[{number}]:")
 
                 rows.extend(format_detail_value(item, indent + 2))
             else:
-                rows.append(f"{prefix}[{number}]: {item!r}")       
+                rows.append(f"{prefix}[{number}]: {item!r}")
     else:
         return [prefix + repr(value)]
-    
+
     return rows

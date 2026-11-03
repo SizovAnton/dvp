@@ -8,7 +8,7 @@ from rich.console import Console, Group
 from displaying.reviw import build_event_review_view, build_atomic_runs_view
 from displaying.table import build_report_metadata_view
 from handlers.correlation import (
-    correlate_processes, 
+    correlate_processes,
     link_atomic_runs)
 from handlers.events import process_events, config_handler
 from handlers.file_handlers import (
@@ -17,7 +17,11 @@ from handlers.file_handlers import (
     load_xml_file,
     load_configuration
 )
-from handlers.matching import report_handler, validate_rule
+from handlers.matching import (
+    report_handler,
+    validate_rule,
+    validate_live_logsource
+)
 from reporting.report import build_rule_report, save_report_json
 from scripts.check_live_run import run_live_session
 
@@ -42,7 +46,7 @@ def main():
         help="Path to a saved session directory"
     )
     source_group.add_argument(
-        "--live",
+        "--auto",
         action="store_true",
         help="Run auto test and evaluate collected events",
     )
@@ -65,8 +69,8 @@ def main():
 
     args = parser.parse_args()
 
-    if args.atomic_test is not None and not args.live:
-        parser.error("--atomic-test requires --live")
+    if args.atomic_test is not None and not args.auto:
+        parser.error("--atomic-test requires --auto")
 
     if args.execution_log is not None and args.session is None:
         parser.error("--execution-log requires --session")
@@ -74,9 +78,9 @@ def main():
     technique = None
     test_number = None
 
-    if args.live:
+    if args.auto:
         if args.atomic_test is None:
-            parser.error("--live requires --atomic-test TECHNIQUE TEST_NUMBER")
+            parser.error("--auto requires --atomic-test TECHNIQUE TEST_NUMBER")
 
         technique, raw_test_number = args.atomic_test
         technique = technique.strip().upper()
@@ -115,6 +119,12 @@ def main():
         project_dir / "config" / "config.json"
     )
 
+    if args.auto:
+        try:
+            validate_live_logsource(sigma_rule, configuration)
+        except ValueError as e:
+            parser.error(f"Unsupported live logsource: {e}")
+
     if args.session is not None:
         with events_path.open("r", encoding="utf-8") as file:
             events = json.load(file)
@@ -123,7 +133,8 @@ def main():
                 event["source"] = config_handler(
                     event["channel"],
                     event["provider"],
-                    configuration
+                    configuration,
+                    event["event_id"]
                 )
 
         scenario_path = args.session / "scenario.json"
@@ -167,7 +178,7 @@ def main():
         at_run = matching_runs[0]
         correlation = correlate_processes(at_run, events)
 
-    elif args.live:
+    elif args.auto:
         live_session = run_live_session(technique, test_number)
 
         events = live_session["events"]
@@ -181,7 +192,7 @@ def main():
         atomic_log = load_csv_file(str(project_dir / configuration["atomic"]["log_path"]))
         linked_runs = link_atomic_runs(atomic_log, events, configuration["correlation"])
 
-    if args.session is not None or args.live:
+    if args.session is not None or args.auto:
         correlation_status = correlation["correlation_status"]
         root_candidates = correlation["root_candidates"]
         root_evidence = correlation["root_evidence"]
@@ -212,7 +223,7 @@ def main():
                 "correlation_issues": [],
             }
         ]
-        
+
     event_results = report_handler(events, sigma_rule)
     report = build_rule_report(sigma_rule, event_results, linked_runs)
 
@@ -240,13 +251,12 @@ def main():
         views.append(atomic_runs_view)
 
     views.append(evidence_view)
-      
+
     console = Console()
     console.print(Group(*views))
     console.print(f"Report saved: {output_path}", markup=False)
 
     return report
-
 
 if __name__ == "__main__":
     main()

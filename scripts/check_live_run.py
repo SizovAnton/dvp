@@ -1,7 +1,7 @@
 import subprocess
 import json
 import xml.etree.ElementTree as ET
-import sys 
+import sys
 from pathlib import Path
 from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
@@ -109,10 +109,10 @@ def run_live_session(technique, test_number):
 
     with collector_log_path.open("w", encoding="utf-8") as collector_log:
         with ThreadPoolExecutor(max_workers=1) as executor:
-            with subprocess.Popen(collector_command, 
+            with subprocess.Popen(collector_command,
                                   stdout = subprocess.PIPE,
                                   stderr=collector_log,
-                                  text=True, 
+                                  text=True,
                                   encoding="utf-8") as collector:
                 try:
                     if collector.stdout is None:
@@ -151,7 +151,7 @@ def run_live_session(technique, test_number):
 
                         root = ET.fromstring(message["xml"])
                         prepared_events = process_events([root], config)
-                        collected_events.extend(prepared_events) 
+                        collected_events.extend(prepared_events)
 
                     collector_returncode = collector.wait()
 
@@ -232,4 +232,4 @@ def run_live_session(technique, test_number):
         "atomic_run": at_run,
         "correlation": correlation,
     }
-                                            
+

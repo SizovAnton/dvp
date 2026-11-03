@@ -1,4 +1,4 @@
-import sys 
+import sys
 from pathlib import Path
 import subprocess
 import json
@@ -56,7 +56,7 @@ with subprocess.Popen(
                 raise ValueError(
                     f"Unknown collector message type: {message.get('type')!r}"
                 )
-            
+
             root = ET.fromstring(message["xml"])
             prepared_events = process_events([root], configuration)
             collected_events.extend(prepared_events)
@@ -77,6 +77,6 @@ with subprocess.Popen(
 
     if not collector_ready:
         raise RuntimeError("Collector did not confirm readiness")
-    
+
     print("Collected events:", len(collected_events))
     print("returncode:", returncode)

@@ -5,19 +5,23 @@ from datetime import datetime, timezone
 
 ns = {"ns": "http://schemas.microsoft.com/win/2004/08/events/event"}
 
-def config_handler(channel, provider, config) -> dict:
-
+def config_handler(channel, provider, config, event_id) -> dict:
     for source in config["sources"]:
         if source["channel"] == channel and source["provider"] == provider:
+            categiries = source.get("event_categories", {})
 
-            return source
+            return {
+                **source,
+                "category": categiries.get(str(event_id))
+            }
 
     defaults = config["defaults"]["windows_event_log"]
 
     return {
         ** defaults,
         "channel" : channel,
-        "provider" : provider
+        "provider" : provider,
+        "category" : None
     }
 
 def process_events(xml, config, ns=ns):
@@ -33,9 +37,10 @@ def process_events(xml, config, ns=ns):
         else:
             provider = "Unknown"
 
-        source_description = config_handler(channel, provider, config)
-
         event_id = event.findtext('ns:System/ns:EventID', default="Unknown", namespaces=ns,)
+        source_description = config_handler(channel, provider, config, event_id)
+
+
         computer = event.findtext('ns:System/ns:Computer', default="Unknown", namespaces=ns,)
         time_created = event.find('ns:System/ns:TimeCreated', namespaces=ns)
 

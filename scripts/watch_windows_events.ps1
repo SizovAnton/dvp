@@ -85,7 +85,7 @@ try {
 
     [Console]::Out.WriteLine($readyJson)
     [Console]::Out.Flush()
-    
+
     $processed = 0
 
     $postRunTimer = $null
@@ -112,7 +112,7 @@ try {
         $notification = Wait-Event `
             -SourceIdentifier $sourceIdentifier `
             -Timeout 1
-    
+
         if ($null -eq $notification) {
             continue
         }
@@ -128,10 +128,10 @@ try {
 
     $watcher.Enabled = $false
     $drained = 0
-    
+
     do {
         $pending = @(
-            Get-Event | 
+            Get-Event |
             Where-Object { $_.SourceIdentifier -eq $sourceIdentifier }
         )
 

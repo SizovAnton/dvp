@@ -43,7 +43,7 @@ try {
         -WarningAction SilentlyContinue `
         -WarningVariable definitionWarnings
 
-  
+
     foreach ($warning in $definitionWarnings) {
         [Console]::Error.WriteLine("WARNING: {0}", $warning.Message)
     }
@@ -115,7 +115,7 @@ try {
     if ($testExitCode -ne 0) {
         throw "Scenario execution failed with exit code $testExitCode"
     }
-    
+
     $result = @{
         status         = "succeeded"
         run_id         = $runId

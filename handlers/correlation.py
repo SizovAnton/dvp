@@ -79,7 +79,7 @@ def find_root_candidates(at_run, events):
 
     if not isinstance(prepared_hostname, str) or not prepared_hostname.strip():
         raise ValueError("Run Hostname must be a non-empty string")
-    
+
     hostname = prepared_hostname.strip().split(".", 1)[0].casefold()
     raw_process_id = at_run.get("ProcessId")
 
@@ -93,7 +93,7 @@ def find_root_candidates(at_run, events):
 
     if process_id <= 0:
         raise ValueError("Run ProcessId must be positive")
-    
+
     for event in events:
         profile = event.get("source", {}).get("process_creation")
 
@@ -187,7 +187,7 @@ def find_child_candidates(parent_event, events):
     data_fields = parent_event.get("data_fields")
     if not isinstance(data_fields, dict):
         raise ValueError("Parent event data_fields must be a dictionary")
-    
+
     actual_event_id = parent_event.get("event_id")
     expected_event_id = profile.get("event_id")
 
@@ -196,12 +196,12 @@ def find_child_candidates(parent_event, events):
 
     if actual_event_id != expected_event_id:
         raise ValueError("Parent event must describe process creation")
-    
+
     pid_field_name = profile.get("pid_field")
 
     if not isinstance(pid_field_name, str) or not pid_field_name.strip():
         raise ValueError("process_creation.pid_field must be a non-empty string")
-    
+
     raw_pid = data_fields.get(pid_field_name)
 
     if not isinstance(raw_pid, str) or not raw_pid.strip():
@@ -219,19 +219,19 @@ def find_child_candidates(parent_event, events):
 
     if process_pid <= 0:
         raise ValueError("Parent event PID must be positive")
-    
+
     guid_field = profile.get("guid_field")
     process_guid = None
 
     if guid_field is not None:
         if not isinstance(guid_field, str) or not guid_field.strip():
             raise ValueError("process_creation.guid_field must be a non-empty string or null")
-        
+
         raw_guid = data_fields.get(guid_field)
 
         if isinstance(raw_guid, str) and raw_guid.strip():
             process_guid = raw_guid.strip().casefold()
-    
+
     for event in events:
         event_source = event.get("source")
 
@@ -242,12 +242,12 @@ def find_child_candidates(parent_event, events):
 
         if event_profile is None:
             continue
-         
+
         if not isinstance(event_profile, dict):
             raise ValueError("Event process_creation must be a dictionary")
 
         event_expected_id = event_profile.get("event_id")
-        
+
         if not isinstance(event_expected_id, str) or not event_expected_id.strip():
             raise ValueError("Event process_creation.event_id must be a non-empty string")
 
@@ -319,25 +319,25 @@ def find_child_candidates(parent_event, events):
             continue
 
         parent_pid_field_name = event_profile.get("parent_pid_field")
-    
+
         if not isinstance(parent_pid_field_name, str) or not parent_pid_field_name.strip():
             raise ValueError("process_creation.parent_pid_field must be a non-empty string")
-    
+
         parent_pid_base = event_profile.get("parent_pid_base")
-    
+
         if type(parent_pid_base) is not int or not 2 <= parent_pid_base <= 36:
             raise ValueError("process_creation.parent_pid_base must be an integer from 2 to 36")
 
         raw_parent_pid = event_fields.get(parent_pid_field_name)
-    
+
         if not isinstance(raw_parent_pid, str) or not raw_parent_pid.strip():
             continue
-    
+
         try:
             event_parent_pid = int(raw_parent_pid.strip(), parent_pid_base)
         except:
             continue
-    
+
         if event_parent_pid == process_pid:
             candidates.append(event)
 
