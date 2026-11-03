@@ -7,10 +7,10 @@ from rich.text import Text
 from displaying.table import add_checks_rows, format_check_details
 
 def explain_field_check(check):
-    if check["Field Present"] is False:
-        status = "FIELD MISSING"
-    elif check["Matched"] is True:
+    if check["Matched"] is True:
         status = "MATCH"
+    elif check["Field Present"] is False:
+        status = "FIELD MISSING"
     else:
         status = "NO MATCH"
 
@@ -33,7 +33,7 @@ def find_check_pattern(patterns, pattern_reference):
     for pattern in patterns:
         if pattern["Pattern Reference"] == pattern_reference:
             return pattern
-        
+
     raise ValueError(f"Pattern not found: {pattern_reference}")
 
 def build_event_review_view(rule, pattern_limit=10, full_detail = False, pattern_reference=None):
@@ -51,7 +51,7 @@ def build_event_review_view(rule, pattern_limit=10, full_detail = False, pattern
 
     show_all_groups = full_detail or pattern_reference is not None
 
-    
+
 
     summary_table = Table(title="Evidence Group", show_lines=True)
     summary_table.add_column("Group")
@@ -90,7 +90,7 @@ def build_event_review_view(rule, pattern_limit=10, full_detail = False, pattern
             shown_references = item["Example Groups"]
 
         shown_labels = ", ".join(
-            reference.rsplit("-", 1)[-1] 
+            reference.rsplit("-", 1)[-1]
             for reference in shown_references
         )
 
@@ -168,12 +168,7 @@ def format_pattern_checks(pattern):
 
     for block, result in pattern["Checks"].items():
         for name, detail in result.items():
-            if detail["Field Present"] is False:
-                status = "FIELD MISSING"
-            elif detail["Matched"] is True:
-                status = "MATCH"
-            else:
-                status = "NO MATCH"
+            status = explain_field_check(detail)["Status"]
 
             rows.append(f"{block}.{name}: {status}")
 
@@ -187,31 +182,68 @@ def format_pattern_checks(pattern):
 
     return "\n".join(rows)
 
-def build_atomic_runs_view(report):
-    table = Table(title="Atomic Runs", show_lines=True)
+def build_atomic_runs_view(report, show_correlation=False):
+    table = Table(title="Atomic Runs — rule results among candidate events", show_lines=True)
 
     table.add_column("Run")
     table.add_column("Test")
     table.add_column("Time UTC")
     table.add_column("Candidates")
+    table.add_column("Correlation")
+    table.add_column("Process Links")
     table.add_column("Match")
     table.add_column("Unmatch")
     table.add_column("Skipped")
     table.add_column("Issues")
 
+    root_notes = []
+
+    limitation_labels ={
+        "pid_reuse_not_excluded": "PID reuse has not been ruled out."
+    }
+
     for run in report["Atomic Runs"]:
         atomic = run["Atomic Run"]
         summary = run["Events Summary"]
+        root_evidence = run.get("Root Correlation Evidence") or []
+
+        for root in root_evidence:
+            for limitation in root.get("limitations", []):
+                description = limitation_labels.get(limitation, limitation)
+
+                root_notes.append(Text(
+                    f"Run {run['Run Reference']} — "
+                    f"root event {root['record_id']} "
+                    f"({root['method']}): {description}"
+                ))
+
+        evidence = run.get("Process Correlation Evidence")
+
+        if evidence is None:
+            links_test = "Not recorded"
+        else:
+            guid_count = sum(
+                1 for link in evidence if link["method"] == "process_guid"
+            )
+            pid_count = sum(
+                1 for link in evidence if link["method"] == "process_pid"
+            )
+
+            links_test = f"GUID: {guid_count}\nPID: {pid_count}"
 
         table.add_row(
             Text(run["Run Reference"]),
             Text(str(atomic["Test Name"])),
             str(atomic["Execution Time (UTC)"]),
-            str(run["Candidate Events"]),        
+            str(run["Candidate Events"]),
+            Text(run["Correlation Status"]),
+            Text(links_test),
             str(summary["Match"]),
             str(summary["Unmatch"]),
             str(summary["Skipped"]),
             str(len(run["Correlation Issues"]))
         )
+    if show_correlation:
+        return Group(table, *root_notes)
 
-    return table
+    return Group(table)

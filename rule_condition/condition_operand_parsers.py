@@ -13,7 +13,7 @@ def parse_primary(tokens, position):
             raise ValueError("Expected ')' after expression")
 
         return node, next_position + 1
-    
+
     if token not in ("and", "or", "not", "(", ")"):
         node = {
             "type" : "reference",
@@ -21,7 +21,7 @@ def parse_primary(tokens, position):
         }
 
         return node, position + 1
-    
+
     raise ValueError(f"Unexpected token: {token!r}")
 
 def parse_not(tokens, position):
@@ -106,5 +106,5 @@ def explain_condition(node, block_results):
         }
 
     raise ValueError(f"Unknown node type: {node['type']!r}")
-        
+
 
