@@ -361,30 +361,56 @@ def validate_live_logsource(sigma_rule, configuration):
     logsource = sigma_rule.get("logsource", {})
     channels = configuration["events"]["channels"]
 
-    if (not isinstance(channels, list) or not channels or not isinstance(channels[0], str) or not channels[0].strip()):
-        raise ValueError("Live collection requires a non-empty list of channels "
-    "with a valid first channel")
+    if not isinstance(channels, list) or not channels:
+        raise ValueError(
+            "Live collection requires a non-empty list of channels"
+        )
 
-    active_channel = channels[0]
+    active_channels = set()
+
+    for index, channel in enumerate(channels, start=1):
+        if not isinstance(channel, str) or not channel.strip():
+            raise ValueError(
+                f"Event channel #{index} must be a non-empty string"
+            )
+
+        channel_key = channel.strip().casefold()
+
+        if channel_key in active_channels:
+            raise ValueError(f"Duplicate event channel: {channel!r}")
+
+        active_channels.add(channel_key)
 
     for source in configuration["sources"]:
-        if source.get("channel") != active_channel:
+        source_channel = source.get("channel")
+
+        if not isinstance(source_channel, str):
             continue
 
-        if ("product" in logsource
-            and logsource["product"] != source.get("product")):
+        if source_channel.strip().casefold() not in active_channels:
             continue
 
-        if ("service" in logsource
-            and logsource["service"] != source.get("service")):
+        if (
+            "product" in logsource
+            and logsource["product"] != source.get("product")
+        ):
+            continue
+
+        if (
+            "service" in logsource
+            and logsource["service"] != source.get("service")
+        ):
             continue
 
         if "category" in logsource:
             categories = source.get("event_categories", {})
+
             if logsource["category"] not in categories.values():
                 continue
 
         return
 
-    raise ValueError(f"Rule logsource {logsource!r} is not supported "
-        f"by the active collection channel {active_channel!r}")
+    raise ValueError(
+        f"Rule logsource {logsource!r} is not supported "
+        f"by the configured collection channels {channels!r}"
+    )

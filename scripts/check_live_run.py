@@ -84,10 +84,24 @@ def run_live_session(technique, test_number):
     if not isinstance(channels, list) or not channels:
         raise ValueError("events.channels must be a non-empty list")
 
-    collector_channel = channels[0]
+    normalized_channels = []
+    seen_channels = set()
 
-    if not isinstance(collector_channel, str) or not collector_channel.strip():
-        raise ValueError("The first event channel must be a non-empty string")
+    for index, channel in enumerate(channels, start=1):
+        if not isinstance(channel, str) or not channel.strip():
+            raise ValueError(f"Event channel #{index} must be a non-empty string")
+
+        channel = channel.strip()
+        channel_key = channel.casefold()
+
+        if channel_key in seen_channels:
+            raise ValueError(f"Duplicate event channel: {channel!r}")
+
+        seen_channels.add(channel_key)
+        normalized_channels.append(channel)
+
+    channels = normalized_channels
+    channels_json = json.dumps(channels, ensure_ascii=False)
 
     collector_command = [
         "powershell.exe",
@@ -95,8 +109,8 @@ def run_live_session(technique, test_number):
         "-NonInteractive",
         "-File",
         str(collector_path),
-        "-LogName",
-        collector_channel,
+        "-LogNamesJson",
+        channels_json,
         "-StopFile",
         str(stop_file)
     ]
@@ -128,8 +142,11 @@ def run_live_session(technique, test_number):
                             if collector_ready:
                                 raise RuntimeError("Collector sent readiness more than once")
 
-                            if message.get("log_name") != collector_channel:
-                                raise RuntimeError("Collector confirmed an unexpected channel")
+                            ready_channels = message.get("channels")
+
+                            if ready_channels != channels:
+                                raise RuntimeError("Collector confirmed unexpected channels: "
+                                    f"{ready_channels!r}; expected {channels!r}")
 
                             collector_ready = True
 

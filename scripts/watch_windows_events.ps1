@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
-    [string]$LogName,
+    [string]$LogNamesJson,
 
     [Parameter(Mandatory = $true)]
     [ValidateNotNullOrEmpty()]
@@ -12,6 +12,55 @@ param(
 )
 
 [Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
+
+try {
+    $wrappedJson = '{"channels":' + $LogNamesJson + '}'
+
+    $parsedObject = ConvertFrom-Json `
+        -InputObject $wrappedJson `
+        -ErrorAction Stop
+    
+    $parsedLogNames = $parsedObject.channels
+
+    if ($parsedLogNames -isnot [System.Array]) {
+        throw "LogNamesJson must contain a JSON array."
+    }
+
+    if ($parsedLogNames.Count -eq 0){
+        throw "At least one event channel is required."
+    }
+
+    $seenLogNames = @{}
+
+    $logNames = @(
+        foreach ($name in $parsedLogNames){
+            if ($name -isnot [string]){
+                throw "Each event channel must be a string"
+            }
+
+            $name = $name.Trim()
+
+            if([string]::IsNullOrWhiteSpace($name)){
+                throw "Event channel must not be empty."
+            }
+
+            if($seenLogNames.ContainsKey($name)){
+                throw "Duplicate event channel: $name"
+            }
+
+            $seenLogNames[$name] = $true
+            $name
+        }
+    )
+    
+}
+catch{
+    [Console]::Error.WriteLine(
+        "Invalid collector channels: {0}",
+        $_.Exception.Message
+    )
+    exit 1
+}
 
 function Send-EventNotification {
     param(
@@ -50,39 +99,61 @@ function Send-EventNotification {
     }
 }
 
-$sourceIdentifier = "DVP.WindowsEvents"
-$registered = $false
+$subscriptions = [System.Collections.Generic.List[object]]::new()
 
-$query = [System.Diagnostics.Eventing.Reader.EventLogQuery]::new($LogName,
-    [System.Diagnostics.Eventing.Reader.PathType]::LogName, "*")
-
-$watcher = [System.Diagnostics.Eventing.Reader.EventLogWatcher]::new(
-    $query,
-    $null,
-    $false
-)
+$sourceIdentifiers = @{}
 
 try {
     if (Test-Path -LiteralPath $StopFile -ErrorAction Stop) {
         throw "Stop signal path already exists: $StopFile"
     }
 
-    Register-ObjectEvent `
-        -InputObject $watcher `
-        -EventName "EventRecordWritten" `
-        -SourceIdentifier $sourceIdentifier `
-        -ErrorAction Stop
+    foreach ($logName in $logNames) {
+        try {
+            $query = [System.Diagnostics.Eventing.Reader.EventLogQuery]::new(
+                $logName,
+                [System.Diagnostics.Eventing.Reader.PathType]::LogName,
+                "*"
+            )
 
-    $registered = $true
-    $watcher.Enabled = $true
+            $watcher = [System.Diagnostics.Eventing.Reader.EventLogWatcher]::new(
+                $query,
+                $null,
+                $false
+            )
 
-    $readMessage = @{
-        type     = "ready"
-        log_name = $LogName
+            $sourceIdentifier = "DVP.WindowsEvents.$([guid]::NewGuid())"
+
+            $subscription = [PSCustomObject]@{
+                LogName          = $logName
+                SourceIdentifier = $sourceIdentifier
+                Watcher          = $watcher
+                Registered       = $false
+            }
+
+            $subscriptions.Add($subscription)
+            $sourceIdentifiers[$sourceIdentifier] = $logName
+
+            Register-ObjectEvent `
+                -InputObject $watcher `
+                -EventName "EventRecordWritten" `
+                -SourceIdentifier $sourceIdentifier `
+                -ErrorAction Stop
+
+            $subscription.Registered = $true
+            $watcher.Enabled = $true
+        }
+        catch {
+            throw "Cannot start channel [$logName]: $($_.Exception.Message)"
+        }
     }
 
-    $readyJson = $readMessage | ConvertTo-Json -Compress
+    $readyMessage = @{
+        type     = "ready"
+        channels = @($logNames)
+    }
 
+    $readyJson = $readyMessage | ConvertTo-Json -Compress
     [Console]::Out.WriteLine($readyJson)
     [Console]::Out.Flush()
 
@@ -102,23 +173,33 @@ try {
             }
         }
 
-
         if ($null -ne $postRunTimer) {
             if ($postRunTimer.Elapsed.TotalSeconds -ge $PostRunWaitSeconds) {
                 break
             }
         }
 
-        $notification = Wait-Event `
-            -SourceIdentifier $sourceIdentifier `
-            -Timeout 1
+        $pending = @(
+            Get-Event |
+            Where-Object {
+                $sourceIdentifiers.ContainsKey($_.SourceIdentifier)
+            }
+        )
 
-        if ($null -eq $notification) {
+        if ($pending.Count -eq 0){
+            Start-Sleep -Milliseconds 100
             continue
         }
-
-        Send-EventNotification -Notification $notification
-        $processed++
+        foreach($notification in $pending){
+            try{
+                Send-EventNotification -Notification $notification
+                $processed++
+            }
+            catch{
+                $channel = $sourceIdentifiers[$notification.SourceIdentifier]
+                throw "Collection failed for [$channel]: $($_.Exception.Message)"
+            }
+        }
     }
 
     [Console]::Error.WriteLine(
@@ -126,13 +207,16 @@ try {
         $postRunTimer.Elapsed.TotalSeconds
     )
 
-    $watcher.Enabled = $false
+    foreach ($subscription in $subscriptions){
+        $subscription.Watcher.Enabled = $false
+    }
+
     $drained = 0
 
     do {
         $pending = @(
             Get-Event |
-            Where-Object { $_.SourceIdentifier -eq $sourceIdentifier }
+            Where-Object { $sourceIdentifiers.ContainsKey($_.SourceIdentifier)}
         )
 
         foreach ($notification in $pending) {
@@ -154,23 +238,91 @@ catch {
 }
 
 finally {
-    $watcher.Enabled = $false
+    $cleanupFailed = $false
 
-    if ($registered) {
-        Unregister-Event -SourceIdentifier $sourceIdentifier
+    foreach ($subscription in $subscriptions) {
+        try {
+            $subscription.Watcher.Enabled = $false
+        }
+        catch {
+            $cleanupFailed = $true
+            [Console]::Error.WriteLine(
+                "Cannot disable watcher [{0}]: {1}",
+                $subscription.LogName,
+                $_.Exception.Message
+            )
+        }
 
-        Get-Event -SourceIdentifier $sourceIdentifier -ErrorAction SilentlyContinue |
-        ForEach-Object {
-            $record = $_.SourceEventArgs.EventRecord
-
-            if ($null -ne $record) {
-                $record.Dispose()
+        try {
+            if ($subscription.Registered) {
+                Unregister-Event `
+                    -SourceIdentifier $subscription.SourceIdentifier `
+                    -ErrorAction Stop
             }
+        }
+        catch {
+            $cleanupFailed = $true
+            [Console]::Error.WriteLine(
+                "Cannot unregister [{0}]: {1}",
+                $subscription.LogName,
+                $_.Exception.Message
+            )
+        }
 
-            Remove-Event -EventIdentifier $_.EventIdentifier
+        $pending = @(
+            Get-Event `
+                -SourceIdentifier $subscription.SourceIdentifier `
+                -ErrorAction SilentlyContinue
+        )
+
+        foreach ($notification in $pending) {
+            try {
+                $record = $notification.SourceEventArgs.EventRecord
+
+                if ($null -ne $record) {
+                    $record.Dispose()
+                }
+            }
+            catch {
+                $cleanupFailed = $true
+                [Console]::Error.WriteLine(
+                    "Cannot dispose queued record [{0}]: {1}",
+                    $subscription.LogName,
+                    $_.Exception.Message
+                )
+            }
+            finally {
+                try {
+                    Remove-Event `
+                        -EventIdentifier $notification.EventIdentifier `
+                        -ErrorAction Stop
+                }
+                catch {
+                    $cleanupFailed = $true
+                    [Console]::Error.WriteLine(
+                        "Cannot remove queued notification [{0}]: {1}",
+                        $subscription.LogName,
+                        $_.Exception.Message
+                    )
+                }
+            }
+        }
+
+        try {
+            $subscription.Watcher.Dispose()
+        }
+        catch {
+            $cleanupFailed = $true
+            [Console]::Error.WriteLine(
+                "Cannot dispose watcher [{0}]: {1}",
+                $subscription.LogName,
+                $_.Exception.Message
+            )
         }
     }
 
-    $watcher.Dispose()
+    if ($cleanupFailed) {
+        exit 1
+    }
 }
 
