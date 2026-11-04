@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 
 from handlers.events import process_events
 from scripts.check_atomic import run_scenario
@@ -19,21 +20,48 @@ def run_scenario_and_stop(scenario_command, stop_file):
     finally:
         stop_file.touch()
 
-def run_live_session(technique, test_number):
-    if getattr(sys, 'frozen', False):
-        project_dir = Path(sys.executable).resolve().parent
-    else:
-        project_dir = Path(__file__).resolve().parents[1]
+def wait_for_manual_stop(stop_file: Path, cancel_event: Event) -> bool:
+    if sys.platform != "win32":
+        raise RuntimeError("Manual live collection requires Windows")
 
+    if sys.stdin is None or not sys.stdin.isatty():
+        raise RuntimeError("Manual mode requires an interactive console")
+
+    import msvcrt
+
+    skip_special_key = False
+
+    while not cancel_event.is_set():
+        if msvcrt.kbhit():
+            key = msvcrt.getwch()
+
+            if skip_special_key:
+                skip_special_key = False
+            elif key in ("\x00", "\xe0"):
+                skip_special_key = True
+            elif key == "\r":
+                if cancel_event.is_set():
+                    return False
+
+                stop_file.touch()
+                return True
+
+        cancel_event.wait(0.1)
+
+    return False
+
+def run_manual_and_stop(stop_file, cancel_event):
+    try:
+        return wait_for_manual_stop(stop_file, cancel_event)
+    finally:
+        stop_file.touch()
+
+def build_atomic_command(project_dir, config, technique, test_number):
     invoke_atomic_path = project_dir / "scripts" / "invoke_atomic.ps1"
 
     if not invoke_atomic_path.is_file():
-        raise FileNotFoundError(f"PowerShell script not found: {invoke_atomic_path}")
+        raise FileNotFoundError( f"PowerShell script not found: {invoke_atomic_path}")
 
-    default_config = project_dir / "config" / "default.config"
-    config_json = project_dir / "config" / "config.json"
-
-    config = load_configuration(default_config, config_json)
     atomic = config.get("atomic")
 
     if not isinstance(atomic, dict) or not atomic:
@@ -53,7 +81,7 @@ def run_live_session(technique, test_number):
     if type(test_number) is not int or not 1 <= test_number <= 2147483647:
         raise ValueError("Test number must be a positive 32-bit integer")
 
-    scenario_command = [
+    return [
         "powershell.exe",
         "-NoProfile",
         "-NonInteractive",
@@ -66,8 +94,38 @@ def run_live_session(technique, test_number):
         "-Technique",
         technique,
         "-TestNumber",
-        str(test_number),
+        str(test_number)
     ]
+
+def run_live_session(technique=None, test_number=None, *, manual=False):
+    if manual:
+        if technique is not None or test_number is not None:
+            raise ValueError("Manual mode does not accept Atomic parameters")
+
+        if sys.platform != "win32":
+            raise RuntimeError("Manual live collection requires Windows")
+
+        if sys.stdin is None or not sys.stdin.isatty():
+            raise RuntimeError("Manual mode requires an interactive console")
+        
+    if getattr(sys, 'frozen', False):
+        project_dir = Path(sys.executable).resolve().parent
+    else:
+        project_dir = Path(__file__).resolve().parents[1]
+
+    default_config = project_dir / "config" / "default.config"
+    config_json = project_dir / "config" / "config.json"
+
+    config = load_configuration(default_config, config_json)
+
+    scenario_command = None
+    if not manual:
+        scenario_command = build_atomic_command(
+            project_dir,
+            config,
+            technique,
+            test_number
+        )
 
     session_id = str(uuid4())
     session_dir = project_dir / "runs" / session_id
@@ -118,6 +176,7 @@ def run_live_session(technique, test_number):
     collected_events = []
     collector_ready = False
     scenario_future = None
+    cancel_event = Event()
 
     collector_log_path = session_dir / "collector.log"
 
@@ -150,13 +209,30 @@ def run_live_session(technique, test_number):
 
                             collector_ready = True
 
-                            scenario_future = executor.submit(
-                                run_scenario_and_stop,
-                                scenario_command,
-                                stop_file
-                            )
+                            if manual:
+                                scenario_future = executor.submit(
+                                    run_manual_and_stop,
+                                    stop_file,
+                                    cancel_event,
+                                )
 
-                            print("Collector ready; scenario started", flush=True,)
+                                print(
+                                    "Collector ready; perform the test from "
+                                    "Kali/Parrot, then press Enter here to stop.",
+                                    flush=True,
+                                )
+                            else:
+                                scenario_future = executor.submit(
+                                    run_scenario_and_stop,
+                                    scenario_command,
+                                    stop_file,
+                                )
+
+                                print(
+                                    "Collector ready; scenario started",
+                                    flush=True,
+                                )
+
                             continue
 
                         if message.get("type") != "event":
@@ -183,6 +259,8 @@ def run_live_session(technique, test_number):
                         raise RuntimeError("Collector finished before the stop signal")
 
                 finally:
+                    cancel_event.set()
+
                     if collector.poll() is None:
                         try:
                             stop_file.touch()
@@ -193,7 +271,24 @@ def run_live_session(technique, test_number):
                                 collector.kill()
                                 collector.communicate()
 
-            execution_results = scenario_future.result()
+            session_result = scenario_future.result()
+
+            if manual:
+                if session_result is not True:
+                    raise RuntimeError("Manual session ended without Enter confirmation")
+
+                execution_results = {
+                    "mode": "manual",
+                    "session_id": session_id,
+                    "status": "succeeded",
+                    "channels": channels,
+                    "stop_reason": "enter"
+                }
+            else:
+                if not isinstance(session_result, dict):
+                    raise RuntimeError("Automatic scenario result must be a dictionary")
+
+                execution_results = session_result
 
     output_events = session_dir / "events.json"
     with output_events.open("w", encoding="utf-8") as output_events_file:
@@ -202,6 +297,15 @@ def run_live_session(technique, test_number):
     output_scenario = session_dir / "scenario.json"
     with output_scenario.open("w", encoding="utf-8") as output_scenario_file:
         json.dump(execution_results, output_scenario_file, ensure_ascii=False, indent=2)
+
+    if manual:
+        return {
+            "session_dir": session_dir,
+            "events": collected_events,
+            "scenario": execution_results,
+            "atomic_run": None,
+            "correlation": None,
+        }
 
     execution_log_path = Path(execution_results["execution_log"])
 

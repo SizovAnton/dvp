@@ -66,8 +66,14 @@ def main():
         metavar=("TECHNIQUE", "TEST_NUMBER"),
         help="Specify the Atomic Red Team technique and test number to run",
     )
+    source_group.add_argument(
+        "--manual",
+        action="store_true",
+        help="Collect Windows events until Enter and evaluate the rule"
+    )
 
     args = parser.parse_args()
+    manual_session = args.manual
 
     if args.atomic_test is not None and not args.auto:
         parser.error("--atomic-test requires --auto")
@@ -119,7 +125,7 @@ def main():
         project_dir / "config" / "config.json"
     )
 
-    if args.auto:
+    if args.auto or args.manual:
         try:
             validate_live_logsource(sigma_rule, configuration)
         except ValueError as e:
@@ -148,35 +154,95 @@ def main():
         if not isinstance(scenario, dict):
             parser.error("Session scenario must be a JSON object")
 
-        if args.execution_log is not None:
-            execution_log_path = args.execution_log
+        session_mode = scenario.get("mode", "auto")
+
+        if session_mode not in ("auto", "manual"):
+            parser.error(f"Unsupported session mode: {session_mode!r}")
+
+        manual_session = session_mode == "manual"
+
+        if manual_session:
+            if args.execution_log is not None:
+                parser.error(
+                    "--execution-log is not applicable to a manual session"
+                )
+
+            if scenario.get("status") != "succeeded":
+                parser.error(
+                    "Manual session collection was not completed successfully"
+                )
+
+            linked_runs = []
+
         else:
-            execution_log_path = Path(scenario["execution_log"])
+            if args.execution_log is not None:
+                execution_log_path = args.execution_log
+            else:
+                execution_log_path = Path(scenario["execution_log"])
 
-        if not execution_log_path.is_file():
-            parser.error(
-                f"Execution log not found: {execution_log_path}. "
-                "Use --execution-log to specify its current location."
-            )
+            if not execution_log_path.is_file():
+                parser.error(
+                    f"Execution log not found: {execution_log_path}. "
+                    "Use --execution-log to specify its current location."
+                )
 
-        execution_rows = load_csv_file(execution_log_path)
-        matching_runs = []
+            execution_rows = load_csv_file(execution_log_path)
+            matching_runs = []
 
-        for row in execution_rows:
-            same_technique = row.get("Technique") == scenario["technique"]
-            same_test = row.get("GUID") == scenario["test_guid"]
+            for row in execution_rows:
+                same_technique = row.get("Technique") == scenario["technique"]
+                same_test = row.get("GUID") == scenario["test_guid"]
 
-            if same_technique and same_test:
-                matching_runs.append(row)
+                if same_technique and same_test:
+                    matching_runs.append(row)
 
-        if len(matching_runs) != 1:
-            parser.error(
-                "Expected one matching execution record; "
-                f"found {len(matching_runs)}"
-            )
+            if len(matching_runs) != 1:
+                parser.error(
+                    "Expected one matching execution record; "
+                    f"found {len(matching_runs)}"
+                )
 
-        at_run = matching_runs[0]
-        correlation = correlate_processes(at_run, events)
+            at_run = matching_runs[0]
+            correlation = correlate_processes(at_run, events)
+
+        # if args.execution_log is not None:
+        #     execution_log_path = args.execution_log
+        # else:
+        #     execution_log_path = Path(scenario["execution_log"])
+
+        # if not execution_log_path.is_file():
+        #     parser.error(
+        #         f"Execution log not found: {execution_log_path}. "
+        #         "Use --execution-log to specify its current location."
+        #     )
+
+        # execution_rows = load_csv_file(execution_log_path)
+        # matching_runs = []
+
+        # for row in execution_rows:
+        #     same_technique = row.get("Technique") == scenario["technique"]
+        #     same_test = row.get("GUID") == scenario["test_guid"]
+
+        #     if same_technique and same_test:
+        #         matching_runs.append(row)
+
+        # if len(matching_runs) != 1:
+        #     parser.error(
+        #         "Expected one matching execution record; "
+        #         f"found {len(matching_runs)}"
+        #     )
+
+        # at_run = matching_runs[0]
+        # correlation = correlate_processes(at_run, events)
+    elif args.manual:
+        live_session = run_live_session(manual=True)
+
+        events = live_session["events"]
+        scenario = live_session["scenario"]
+
+        linked_runs = []
+
+        print(f"Session saved: {live_session['session_dir']}")
 
     elif args.auto:
         live_session = run_live_session(technique, test_number)
@@ -192,7 +258,7 @@ def main():
         atomic_log = load_csv_file(str(project_dir / configuration["atomic"]["log_path"]))
         linked_runs = link_atomic_runs(atomic_log, events, configuration["correlation"])
 
-    if args.session is not None or args.auto:
+    if (args.session is not None or args.auto) and not manual_session:
         correlation_status = correlation["correlation_status"]
         root_candidates = correlation["root_candidates"]
         root_evidence = correlation["root_evidence"]
@@ -233,16 +299,17 @@ def main():
     output_path = reports_dir / f"{report["Report ID"]}.json"
     save_report_json(report, output_path)
 
+    show_correlation = args.show_correlation and not manual_session
     metadata_view = build_report_metadata_view(
         report,
-        show_correlation=args.show_correlation
+        show_correlation=show_correlation
     )
 
     evidence_view = build_event_review_view(report)
 
     views= [metadata_view]
 
-    if args.show_correlation:
+    if show_correlation:
         atomic_runs_view = build_atomic_runs_view(
             report,
             show_correlation=True
