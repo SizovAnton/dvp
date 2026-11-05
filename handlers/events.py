@@ -1,5 +1,7 @@
 """Підготовка подій Windows та розбір їхнього часу."""
 
+from argparse import Namespace
+from email.policy import default
 import uuid
 from datetime import datetime, timezone
 
@@ -29,6 +31,16 @@ def process_events(xml, config, ns=ns):
 
     for event in xml:
         record_id = str(uuid.uuid4())
+
+        native_record_id = event.findtext(
+            "ns:System/ns:EventRecordID",
+            default=None,
+            namespaces=ns
+        )
+
+        if native_record_id is not None:
+            native_record_id = native_record_id.strip() or None
+
         channel = event.findtext('ns:System/ns:Channel', default="Unknown", namespaces=ns,)
         provider_element = event.find('ns:System/ns:Provider', namespaces=ns,)
 
@@ -59,6 +71,7 @@ def process_events(xml, config, ns=ns):
 
         events_results.append({
             "record_id": record_id,
+            "native_record_id": native_record_id,
             "event_id": event_id,
             "computer": computer,
             "system_time": system_time,

@@ -1,11 +1,11 @@
 {
   "defaults": {
     "windows_event_log": {
-    "description": "Події Windows Event Log",
+    "description": "Windows Event Log events",
     "product": "windows",
     "service": null
 },
-    "unknown": "Невідоме джерело"
+    "unknown": "Unknown source"
   },
   "atomic": {
     "module_path": "C:\\AtomicRedTeam\\invoke-atomicredteam\\Invoke-AtomicRedTeam.psd1",

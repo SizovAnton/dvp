@@ -17,17 +17,55 @@ def add_checks_rows(table, checks, group_reference):
 
 def build_report_metadata_view(report, show_correlation=False):
     sections = []
+    hidden_sections = {
+        "Event Review",
+        "Check Summary",
+        "Atomic Runs",
+        "Event Evidence",
+        "Rule Snapshot",
+        "Session Snapshot"
+    }
+
+    expectation_labels = {
+        "met" : "Meet the expectations",
+        "not_met": "Does not meet the expectations",
+        "insufficient_data": "Require more data",
+        "not_set": "Expectation not set"
+    }
 
     for name, value in report.items():
-        if name in ("Event Review", "Check Summary", "Atomic Runs"):
+        if name in hidden_sections:
             continue
 
         if name == "Correlation Issues" and not show_correlation:
             continue
 
-        sections.append(
-            Text(name, style="bold")
-        )
+        if name == "Analysis":
+            value = {
+                "Analysis ID": value["analysis_id"],
+                "Session ID": value["session_id"],
+                "Mode": value["mode"],
+                "Profile Basis": value["profile_basis"],
+                "Created At UTC": value["created_at"]
+            }
+
+        if name == "Expectation Evaluation":
+            status = value["status"]
+
+            if not isinstance(status, str):
+                raise ValueError ("Expectation evaluation status must be a string")
+            
+            label = expectation_labels.get(status, status)
+
+            sections.append(
+                Text("Expectation assessment", style="bold")
+            )
+            sections.append(Text(label))
+            sections.append(Text(value["reason"]))
+
+            continue
+
+        sections.append(Text(name, style="bold"))
 
         if isinstance(value, str):
             sections.append(Text(value))

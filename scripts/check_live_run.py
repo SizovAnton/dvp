@@ -6,13 +6,14 @@ from pathlib import Path
 from uuid import uuid4
 from concurrent.futures import ThreadPoolExecutor
 from threading import Event
+from datetime import datetime, timezone
+from copy import deepcopy
+from shutil import copyfile
 
 from handlers.events import process_events
 from scripts.check_atomic import run_scenario
 from handlers.file_handlers import load_configuration, load_csv_file
 from handlers.correlation import correlate_processes
-
-
 
 def run_scenario_and_stop(scenario_command, stop_file):
     try:
@@ -97,7 +98,96 @@ def build_atomic_command(project_dir, config, technique, test_number):
         str(test_number)
     ]
 
-def run_live_session(technique=None, test_number=None, *, manual=False):
+def build_session_metadata(session_id, config, channels, *, manual):
+    profile_snapshot = deepcopy({
+        "defaults": config["defaults"],
+        "sources": config["sources"]
+    })
+
+    started_at = datetime.now(timezone.utc).isoformat()
+
+    return {
+        "schema_version": 1,
+        "session_id": session_id,
+        "mode": "manual" if manual else "auto",
+        "producer": {
+            "build_id": None,
+            "normalizer_version": 1,
+        },
+        "collection": {
+            "status": "in_progress",
+            "requested_channels": list(channels),
+            "ready_channels": [],
+            "started_at": started_at,
+            "ready_received_at": None,
+            "finished_at": None,
+            "stop_reason": None,
+            "errors": [],
+        },
+        "profiles_snapshot": profile_snapshot,
+        "artifacts": {
+            "events": "events.json",
+            "scenario": "scenario.json",
+            "execution_log": None
+        }
+    }
+
+def save_session_metadata(session_dir, session_metadata):
+    output_path =session_dir / "session.json"
+    temporary_path = session_dir / "session.json.tmp"
+
+    with temporary_path.open("w", encoding="utf-8") as f:
+        json.dump(
+            session_metadata,
+            f,
+            ensure_ascii=False,
+            indent=2
+        )
+
+    temporary_path.replace(output_path)
+
+def copy_execution_log(session_dir, execution_results):
+    raw_path = execution_results.get("execution_log")
+
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        raise ValueError("Scenario result must include a non-empty execution_log path")
+
+    source_path = Path(raw_path)
+
+    if not source_path.is_file():
+        raise FileNotFoundError(f"Execution log not found: {source_path}")
+
+    output_path = session_dir / "execution.csv"
+    temporary_path = session_dir / "execution.csv.tmp"
+
+    if source_path.resolve() == output_path.resolve():
+        return output_path.name
+
+    copyfile(source_path, temporary_path)
+    temporary_path.replace(output_path)
+
+    return output_path.name
+
+def save_session_files(session_dir, events, scenario):
+    with (session_dir / "events.json").open(
+        "w", encoding="utf-8"
+    ) as f:
+        json.dump(events, f, ensure_ascii=False, indent=2)
+
+    with (session_dir / "scenario.json").open(
+        "w", encoding="utf-8"
+    ) as f:
+        json.dump(scenario, f, ensure_ascii=False, indent=2)
+
+def run_live_session(technique=None, test_number=None, *, manual=False, test_context=None):
+    if test_context is not None and not manual:
+        raise ValueError("test_context requires manual mode")
+
+    if test_context is not None and not isinstance(test_context, dict):
+        raise ValueError("test_context must be a dictionary or None")
+
+    test_context = deepcopy(test_context)
+    
     if manual:
         if technique is not None or test_number is not None:
             raise ValueError("Manual mode does not accept Atomic parameters")
@@ -159,6 +249,14 @@ def run_live_session(technique=None, test_number=None, *, manual=False):
         normalized_channels.append(channel)
 
     channels = normalized_channels
+    session_metadata = build_session_metadata(
+        session_id,
+        config,
+        channels,
+        manual=manual
+    )
+
+    collection = session_metadata["collection"]
     channels_json = json.dumps(channels, ensure_ascii=False)
 
     collector_command = [
@@ -177,137 +275,272 @@ def run_live_session(technique=None, test_number=None, *, manual=False):
     collector_ready = False
     scenario_future = None
     cancel_event = Event()
+    ready_received_at = None
+    interrupted = False
 
     collector_log_path = session_dir / "collector.log"
+    save_session_metadata(session_dir, session_metadata)
 
-    with collector_log_path.open("w", encoding="utf-8") as collector_log:
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            with subprocess.Popen(collector_command,
-                                  stdout = subprocess.PIPE,
-                                  stderr=collector_log,
-                                  text=True,
-                                  encoding="utf-8") as collector:
-                try:
-                    if collector.stdout is None:
-                        raise RuntimeError("Collector stdout is unavailable")
+    try:
+        with collector_log_path.open("w", encoding="utf-8") as collector_log:
+            with ThreadPoolExecutor(max_workers=1) as executor:
+                with subprocess.Popen(collector_command,
+                                    stdout = subprocess.PIPE,
+                                    stderr=collector_log,
+                                    text=True,
+                                    encoding="utf-8") as collector:
+                    try:
+                        if collector.stdout is None:
+                            raise RuntimeError("Collector stdout is unavailable")
 
-                    for line in collector.stdout:
-                        message = json.loads(line)
+                        for line in collector.stdout:
+                            message = json.loads(line)
 
-                        if not isinstance(message, dict):
-                            raise ValueError("Collector message must be a JSON object")
+                            if not isinstance(message, dict):
+                                raise ValueError("Collector message must be a JSON object")
 
-                        if message.get("type") == "ready":
-                            if collector_ready:
-                                raise RuntimeError("Collector sent readiness more than once")
+                            if message.get("type") == "ready":
+                                if collector_ready:
+                                    raise RuntimeError("Collector sent readiness more than once")
 
-                            ready_channels = message.get("channels")
+                                ready_channels = message.get("channels")
 
-                            if ready_channels != channels:
-                                raise RuntimeError("Collector confirmed unexpected channels: "
-                                    f"{ready_channels!r}; expected {channels!r}")
+                                if not isinstance(ready_channels, list):
+                                    raise ValueError("Collector readiness message must include a channels list")
 
-                            collector_ready = True
+                                if ready_channels != channels:
+                                    raise RuntimeError("Collector confirmed unexpected channels: "
+                                        f"{ready_channels!r}; expected {channels!r}")
 
-                            if manual:
-                                scenario_future = executor.submit(
-                                    run_manual_and_stop,
-                                    stop_file,
-                                    cancel_event,
+                                collector_ready = True
+
+                                ready_received_at = datetime.now(timezone.utc).isoformat()
+
+                                collection["ready_channels"] = list(ready_channels)
+                                collection["ready_received_at"] = ready_received_at
+                                save_session_metadata(
+                                    session_dir,
+                                    session_metadata
                                 )
 
-                                print(
-                                    "Collector ready; perform the test from "
-                                    "Kali/Parrot, then press Enter here to stop.",
-                                    flush=True,
-                                )
-                            else:
-                                scenario_future = executor.submit(
-                                    run_scenario_and_stop,
-                                    scenario_command,
-                                    stop_file,
-                                )
+                                if manual:
+                                    scenario_future = executor.submit(
+                                        run_manual_and_stop,
+                                        stop_file,
+                                        cancel_event,
+                                    )
 
-                                print(
-                                    "Collector ready; scenario started",
-                                    flush=True,
-                                )
+                                    print(
+                                        "Collector ready; perform the test from "
+                                        "Kali/Parrot, then press Enter here to stop.",
+                                        flush=True,
+                                    )
+                                else:
+                                    scenario_future = executor.submit(
+                                        run_scenario_and_stop,
+                                        scenario_command,
+                                        stop_file,
+                                    )
 
-                            continue
+                                    print(
+                                        "Collector ready; scenario started",
+                                        flush=True,
+                                    )
 
-                        if message.get("type") != "event":
-                            raise ValueError (f"Unknown collector message type: "
-                                f"{message.get('type')!r}")
+                                continue
 
-                        if not collector_ready:
-                            raise RuntimeError("Collector sent an event before readiness")
+                            if message.get("type") != "event":
+                                raise ValueError (f"Unknown collector message type: "
+                                    f"{message.get('type')!r}")
 
-                        root = ET.fromstring(message["xml"])
-                        prepared_events = process_events([root], config)
-                        collected_events.extend(prepared_events)
+                            if not collector_ready:
+                                raise RuntimeError("Collector sent an event before readiness")
 
-                    collector_returncode = collector.wait()
+                            raw_xml = message.get("xml")
 
-                    if collector_returncode != 0:
-                        raise RuntimeError(f"Collector exited with code {collector_returncode}; "
-                            f"diagnostics: {collector_log_path}")
+                            if not isinstance(raw_xml, str) or not raw_xml.strip():
+                                raise ValueError("Collector event must include non-empty XML")
 
-                    if not collector_ready or scenario_future is None:
-                        raise RuntimeError("Collector finished without starting the scenario")
+                            root = ET.fromstring(raw_xml)
+                            prepared_events = process_events([root], config)
 
-                    if not stop_file.is_file():
-                        raise RuntimeError("Collector finished before the stop signal")
+                            for prepared_event in prepared_events:
+                                prepared_event["raw_xml"] = raw_xml
 
-                finally:
-                    cancel_event.set()
+                            collected_events.extend(prepared_events)
 
-                    if collector.poll() is None:
-                        try:
-                            stop_file.touch()
-                        finally:
+                        collector_returncode = collector.wait()
+
+                        if collector_returncode != 0:
+                            raise RuntimeError(f"Collector exited with code {collector_returncode}; "
+                                f"diagnostics: {collector_log_path}")
+
+                        if not collector_ready or scenario_future is None:
+                            raise RuntimeError("Collector finished without starting the scenario")
+
+                        if not stop_file.is_file():
+                            raise RuntimeError("Collector finished before the stop signal")
+
+                    finally:
+                        cancel_event.set()
+
+                        if collector.poll() is None:
                             try:
-                                collector.communicate(timeout=15)
-                            except subprocess.TimeoutExpired:
-                                collector.kill()
-                                collector.communicate()
+                                stop_file.touch()
+                            finally:
+                                try:
+                                    collector.communicate(timeout=15)
+                                except subprocess.TimeoutExpired:
+                                    collector.kill()
+                                    collector.communicate()
 
-            session_result = scenario_future.result()
+                session_result = scenario_future.result()
 
-            if manual:
-                if session_result is not True:
-                    raise RuntimeError("Manual session ended without Enter confirmation")
+                if manual:
+                    if session_result is not True:
+                        raise RuntimeError("Manual session ended without Enter confirmation")
 
-                execution_results = {
-                    "mode": "manual",
-                    "session_id": session_id,
-                    "status": "succeeded",
-                    "channels": channels,
-                    "stop_reason": "enter"
-                }
+                    execution_results = {
+                        "mode": "manual",
+                        "session_id": session_id,
+                        "test_context": test_context,
+                        "status": "succeeded",
+                        "channels": channels,
+                        "stop_reason": "enter",
+                        "ready_received_at": ready_received_at,
+                        "finished_at": datetime.now(timezone.utc).isoformat()
+                    }
+                else:
+                    if not isinstance(session_result, dict):
+                        raise RuntimeError("Automatic scenario result must be a dictionary")
+
+                    execution_results = session_result
+    
+    except(Exception, KeyboardInterrupt) as e:
+        interrupted = isinstance(e, KeyboardInterrupt)
+
+        collection["status"] = "incomplete"
+        collection["finished_at"] = datetime.now(timezone.utc).isoformat()
+        collection["stop_reason"] = "interrupt" if interrupted else "error"
+        collection["errors"].append({
+            "type": type(e).__name__,
+            "message": str(e) or type(e).__name__
+        })
+
+        if manual:
+            partial_scenario = {
+                "mode": "manual",
+                "session_id": session_id,
+                "test_context": test_context,
+                "status": "incomplete",
+                "channels": channels,
+                "collector_ready": collector_ready,
+                "stop_reason": "interrupt" if interrupted else "error",
+                "error_type": type(e).__name__,
+                "error": str(e) or type(e).__name__,
+                "ready_received_at": ready_received_at,
+                "finished_at": collection["finished_at"]
+
+            }
+
+            try:
+                save_session_files(
+                    session_dir,
+                    collected_events,
+                    partial_scenario
+                )
+            except Exception as save_error:
+                print(
+                F"Could not save partial session: {save_error}",
+                file=sys.stderr,
+                flush=True)
             else:
-                if not isinstance(session_result, dict):
-                    raise RuntimeError("Automatic scenario result must be a dictionary")
+                print(
+                    f"Incomplete session saved: {session_dir}",
+                    file=sys.stderr,
+                    flush=True
+                )
+        try:
+            save_session_metadata(session_dir, session_metadata)
+        except Exception as metadata_error:
+            print(
+                f"Could not save incomplete session metadata: {metadata_error}",
+                file=sys.stderr,
+                flush=True,
+            )
 
-                execution_results = session_result
+        raise
 
-    output_events = session_dir / "events.json"
-    with output_events.open("w", encoding="utf-8") as output_events_file:
-        json.dump(collected_events, output_events_file, ensure_ascii=False, indent=2)
+    try:
+        if manual:
+            collection["finished_at"] = execution_results["finished_at"]
+            collection["stop_reason"] = execution_results["stop_reason"]
+        else:
+            collection["finished_at"] = datetime.now(timezone.utc).isoformat()
+            collection["stop_reason"] = "scenario_finished"
 
-    output_scenario = session_dir / "scenario.json"
-    with output_scenario.open("w", encoding="utf-8") as output_scenario_file:
-        json.dump(execution_results, output_scenario_file, ensure_ascii=False, indent=2)
+            execution_log_name = copy_execution_log(
+                session_dir,
+                execution_results
+            )
+
+            execution_results = {
+                **execution_results,
+                "execution_log": execution_log_name,
+                "execution_log_base": "session"
+            }
+
+            session_metadata["artifacts"]["execution_log"] = execution_log_name
+
+        save_session_files(
+            session_dir,
+            collected_events,
+            execution_results
+        )
+
+        collection["status"] = "completed"
+        save_session_metadata(session_dir, session_metadata)
+
+    except (Exception, KeyboardInterrupt) as save_error:
+        collection["status"] = "incomplete"
+
+        if collection["finished_at"] is None:
+            collection["finished_at"] = datetime.now(timezone.utc).isoformat()
+
+        collection["stop_reason"] = (
+            "interrupt"
+            if isinstance(save_error, KeyboardInterrupt)
+            else "error"
+        )
+
+        collection["errors"].append({
+            "stage": "saving",
+            "type": type(save_error).__name__,
+            "message": str(save_error) or type(save_error).__name__,
+        })
+
+        try:
+            save_session_metadata(session_dir, session_metadata)
+        except Exception as metadata_error:
+            print(
+                f"Could not save incomplete session metadata: {metadata_error}",
+                file=sys.stderr,
+                flush=True,
+            )
+
+        raise
 
     if manual:
         return {
             "session_dir": session_dir,
+            "session_metadata": session_metadata,
             "events": collected_events,
             "scenario": execution_results,
             "atomic_run": None,
             "correlation": None,
         }
 
-    execution_log_path = Path(execution_results["execution_log"])
+    execution_log_path = session_dir / execution_results["execution_log"]
 
     if not execution_log_path.is_file():
         raise FileNotFoundError(f"Execution log not found: {execution_log_path}")
@@ -348,6 +581,7 @@ def run_live_session(technique=None, test_number=None, *, manual=False):
 
     return {
         "session_dir": session_dir,
+        "session_metadata": session_metadata,
         "events": collected_events,
         "scenario": execution_results,
         "atomic_run": at_run,

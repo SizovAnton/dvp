@@ -24,8 +24,8 @@ def main():
     rule = load_sigma_rule(rule_path)
 
     # Перевіряємо завантажені дані.
-    print("Кількість подій:", len(events))
-    print("Правило:", rule["title"])
+    print("Event count:", len(events))
+    print("Rule:", rule["title"])
 
 
 

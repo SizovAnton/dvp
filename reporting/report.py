@@ -1,9 +1,137 @@
-"""Побудова звіту та групування доказів без виведення на екран."""
-
 import json
 import uuid
 
 from handlers.events import parse_event_time
+
+def evaluate_manual_expectation(
+    test_context,
+    summary,
+    *,
+    rule_sha256,
+    collection_status,
+):
+
+    if test_context is None:
+        return {
+            "status": "not_set",
+            "reason": "Manual test expectation not set",
+        }
+
+    if not isinstance(test_context, dict):
+        return {
+            "status": "insufficient_data",
+            "reason": "Manual test context has wrong format",
+        }
+
+    version = test_context.get("schema_version")
+
+    if type(version) is not int or version != 1:
+        return {
+            "status": "insufficient_data",
+            "reason": "Unsupported version of manual test",
+        }
+
+    expectation = test_context.get("expectation")
+
+    if not isinstance(expectation, dict):
+        return {
+            "status": "insufficient_data",
+            "reason": "Missing or incorrect expectation structure.",
+        }
+
+    if "expected_rule_match" not in expectation:
+        return {
+            "status": "insufficient_data",
+            "reason": "Missing required field in saved expectation",
+        }
+
+    expected = expectation["expected_rule_match"]
+
+    if expected is None:
+        return {
+            "status": "not_set",
+            "reason": "No rule match expectation is specified.",
+        }
+
+    if type(expected) is not bool:
+        return {
+            "status": "insufficient_data",
+            "reason": "Match expectation must be true or false.",
+        }
+
+    if expectation.get("scope") != "all_session_events":
+        return {
+            "status": "insufficient_data",
+            "reason": "Unsupported evaluation area",
+        }
+
+    expected_rule_sha256 = expectation.get("rule_sha256")
+
+    if (
+        not isinstance(expected_rule_sha256, str)
+        or not expected_rule_sha256
+        or expected_rule_sha256 != rule_sha256
+    ):
+        return {
+            "status": "insufficient_data",
+            "reason": "The expectation is not tied to the current rule.",
+        }
+
+    if collection_status != "completed":
+        return {
+            "status": "insufficient_data",
+            "reason": "There is no confirmation of a completed collection.",
+        }
+
+    matched = summary["Match"]
+    evaluated = matched + summary["Unmatch"]
+
+    if evaluated == 0:
+        return {
+            "status": "insufficient_data",
+            "reason": "There are no events for which the rule condition has been evaluated.",
+        }
+
+    observed = matched > 0
+
+    return {
+        "status": "met" if observed == expected else "not_met",
+        "reason": (
+            f"Expected match: {expected}; "
+            f"Actual: {observed}. "
+            f"Matched: {matched}, evaluated events: {evaluated}."
+        ),
+    }
+
+def summarize_channels(events, configured_channels):
+    counts = {}
+    channel_names = {}
+
+    for channel in configured_channels:
+        name = channel.strip()
+        key = name.casefold()
+
+        if key not in channel_names:
+            channel_names[key] = name
+            counts[name] = 0
+
+    for event in events:
+        channel = event.get("channel")
+
+        if not isinstance(channel, str) or not channel.strip():
+            channel = "Unknown"
+
+        channel = channel.strip()
+        key = channel.casefold()
+
+        if key not in channel_names:
+            channel_names[key] = channel
+            counts[channel] = 0
+
+        name = channel_names[key]
+        counts[name] += 1
+
+    return counts
 
 def build_time_summary(ref):
     valid_times = []
