@@ -405,24 +405,4 @@ def summaries_atomic_run(linked_runs, report_events):
             run_summary["Events Summary"][category] += 1
             run_summary["Event References"].append(result["Event Reference"])
 
-            
-
-
-    # for result in report_events:
-    #     if result["Run Reference"] is None:
-    #         continue
-
-    #     run_summary = summaries[result["Run Reference"]]
-    #     run_summary["Events Summary"]["Total Events"] += 1
-
-    #     if result["Selection"] is True:
-    #         category = "Match"
-    #     elif result["Selection"] is False:
-    #         category = "Unmatch"
-    #     else:
-    #         category = "Skipped"
-
-    #     run_summary["Events Summary"][category] += 1
-    #     run_summary["Event References"].append(result["Event Reference"])
-
     return list(summaries.values())
