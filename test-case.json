@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "case_id": "manual-local-users-001",
+  "session_id": "bd045787-b8ea-4f94-ba1e-611b7098a30e",
+  "description": "Validate detection of the manually executed local user enumeration.",
+  "evidence": {
+    "method": "manual_record_ids",
+    "reason": "Selected by the engineer using the command line, host and execution time of the manual action.",
+    "record_ids": ["f91be5d1-aacc-48cf-81af-2b30dcad493b"]
+  },
+  "expectation": {
+    "scope": "selected_events",
+    "expected_rule_match": true
+  }
+}

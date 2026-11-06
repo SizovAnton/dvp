@@ -406,3 +406,195 @@ def summaries_atomic_run(linked_runs, report_events):
             run_summary["Event References"].append(result["Event Reference"])
 
     return list(summaries.values())
+
+def select_test_evidence(events, record_ids):
+    if not isinstance(events, list):
+        raise ValueError("Events must be a list")
+
+    if not isinstance(record_ids, list):
+        raise ValueError("Evidence record IDs must be a list")
+
+    event_index = {}
+
+    for event in events:
+        if not isinstance(event, dict):
+            raise ValueError("Each event must be an object")
+
+        record_id = event.get("record_id")
+
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("Event record_id must be a non-empty string")
+
+        if record_id in event_index:
+            raise ValueError(f"Duplicate event record_id: {record_id}")
+
+        event_index[record_id] = event
+
+    selected = []
+    seen = set()
+
+    for record_id in record_ids:
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("Evidence record ID must be a non-empty string")
+
+        if record_id in seen:
+            raise ValueError(f"Duplicate evidence record ID: {record_id}")
+
+        if record_id not in event_index:
+            raise ValueError(f"Evidence event was not found: {record_id}")
+
+        seen.add(record_id)
+        selected.append(event_index[record_id])
+
+    return selected
+
+def resolve_test_evidence(test_case, session_metadata, events):
+
+    if not isinstance(session_metadata, dict):
+        raise ValueError("A session passport is required to resolve test evidence")
+
+    actual_session_id = session_metadata.get("session_id")
+
+    if (not isinstance(actual_session_id, str) or not actual_session_id.strip()):
+        raise ValueError("Session passport must contain a valid session_id")
+
+    expected_session_id = test_case["session_id"]
+
+    if actual_session_id != expected_session_id:
+        raise ValueError("Test case session_id does not match the loaded session")
+
+    return select_test_evidence(events, test_case["evidence"]["record_ids"])
+
+def partition_test_results(selected_events, event_results):
+    selected_ids = {
+        event["record_id"]
+        for event in selected_events
+    }
+
+    if not isinstance(event_results, list):
+        raise ValueError("Event results must be a list")
+
+    selected_results = []
+    other_results = []
+    seen_result_ids = set()
+
+    for result in event_results:
+        if not isinstance(result, dict):
+            raise ValueError("Each event result must be an object")
+
+        record_id = result.get("Log Record ID")
+
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("Result Log Record ID must be a non-empty string")
+
+        if record_id in seen_result_ids:
+            raise ValueError(f"Duplicate event result: {record_id}")
+
+        seen_result_ids.add(record_id)
+
+        if "Selection" not in result:
+            raise ValueError(f"Result Selection is missing: {record_id}")
+
+        selection = result["Selection"]
+
+        if selection is not None and type(selection) is not bool:
+            raise ValueError(f"Invalid result Selection: {record_id}")
+
+        if record_id in selected_ids:
+            selected_results.append(result)
+        else:
+            other_results.append(result)
+
+    missing_result_ids = [
+        event["record_id"]
+        for event in selected_events
+        if event["record_id"] not in seen_result_ids
+    ]
+
+    return {
+        "selected_results": selected_results,
+        "other_results": other_results,
+        "missing_result_ids": missing_result_ids,
+    }
+
+def evaluate_test_case(test_case, session_metadata, events, event_results):
+    selected_events = resolve_test_evidence(
+        test_case, session_metadata, events
+    )
+
+    partitions = partition_test_results(selected_events, event_results)
+    selected_results = partitions["selected_results"]
+    other_results = partitions["other_results"]
+
+    matched = sum(
+        result["Selection"] is True for result in selected_results
+    )
+    unmatched = sum(
+        result["Selection"] is False for result in selected_results
+    )
+    skipped = sum(
+        result["Selection"] is None for result in selected_results
+    )
+
+    expected = test_case["expectation"]["expected_rule_match"]
+
+    evaluation = {
+        "case_id": test_case["case_id"],
+        "session_id": test_case["session_id"],
+        "scope": "selected_events",
+        "expected_rule_match": expected,
+        "observed_rule_match": None,
+        "selected_event_count": len(selected_events),
+        "selected_results": {
+            "Match": matched,
+            "Unmatch": unmatched,
+            "Skipped": skipped,
+        },
+        "outside_match_count": sum(
+            result["Selection"] is True for result in other_results
+        ),
+        "missing_result_ids": partitions["missing_result_ids"],
+        "telemetry_status": "not_assessed",
+        "status": "insufficient_data",
+        "reason": "",
+    }
+
+    collection = session_metadata.get("collection")
+    collection_status = (
+        collection.get("status")
+        if isinstance(collection, dict)
+        else None
+    )
+
+    if collection_status != "completed":
+        evaluation["reason"] = "Collection completion is not confirmed."
+
+    elif not selected_events:
+        evaluation["reason"] = "No test evidence was selected."
+
+    elif partitions["missing_result_ids"]:
+        evaluation["reason"] = (
+            "Some selected events have no rule evaluation result."
+        )
+
+    elif skipped:
+        evaluation["reason"] = (
+            "Some selected events were skipped; "
+            "the selected evidence was not fully evaluated."
+        )
+
+    else:
+        observed = matched > 0
+
+        evaluation["observed_rule_match"] = observed
+        evaluation["status"] = (
+            "met" if observed == expected else "not_met"
+        )
+        evaluation["reason"] = (
+            "The rule-match expectation on selected evidence was met."
+            if observed == expected
+            else "The rule-match expectation on selected evidence was not met."
+        )
+
+    return evaluation
+

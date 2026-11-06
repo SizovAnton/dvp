@@ -64,13 +64,15 @@ def build_html_report(report):
         ),
         (
             "evaluation",
-            "2. Evaluation Summary and Reasons",
-            {
+            "2. Evaluation Summary and Reasons", {
                 "Events Summary": report.get("Events Summary"),
-                "Expectation Evaluation": report.get(
+                "Session Expectation Evaluation": report.get(
                     "Expectation Evaluation"
                 ),
-                "Conclusion": report.get("Conclusion"),
+                "Selected Evidence Evaluation": report.get(
+                    "Test Case Evaluation"
+                ),
+                "Session Conclusion": report.get("Conclusion"),
                 "Rule": report.get("Rule"),
             },
         ),
@@ -87,7 +89,10 @@ def build_html_report(report):
         (
             "manual-test",
             "5. Manual Test Context",
-            report.get("Manual Test Context"),
+            {
+                "Collection Context": report.get("Manual Test Context"),
+                "Test Case": report.get("Test Case"),
+            },
         ),
     ]
 
@@ -95,6 +100,10 @@ def build_html_report(report):
     content = []
 
     event_explanations = build_event_explanations(report.get("Event Review"))
+
+    test_case = report.get("Test Case")
+
+    selected_evidence_ids = (None if test_case is None else set(test_case["evidence"]["record_ids"]))
 
     for section_id, title, data in sections:
         safe_id = escape(section_id, quote=True)
@@ -105,11 +114,23 @@ def build_html_report(report):
         )
 
         if section_id == "details":
-            section_body = render_event_cards(data, event_explanations)
+            section_body = render_event_cards(
+                data, 
+                event_explanations,
+                selected_evidence_ids)
+            
         elif section_id == "events":
             section_body = render_event_review(data, report.get("Event Evidence"))
         else:
             section_body = render_value(data)
+
+        if (section_id == "evaluation" and report.get("Test Case Evaluation") is not None):
+            section_body = (
+                "<p>Selected evidence evaluation checks the rule-match "
+                "expectation on the selected events only. "
+                "Telemetry sufficiency has not been assessed.</p>"
+                + section_body
+            )
 
         content.append(
             f'<section id="{safe_id}">'
@@ -370,7 +391,7 @@ def save_report_html(report, output_path: Path):
 def event_anchor(record_id):
     return "event-" + record_id.encode("utf-8").hex()
 
-def render_event_cards(evidence, event_explanations):
+def render_event_cards(evidence, event_explanations, selected_evidence_ids=None):
     if evidence is None:
         return "<p>Full event evidence is unavailable in this report.</p>"
 
@@ -394,6 +415,22 @@ def render_event_cards(evidence, event_explanations):
 
         anchor = event_anchor(record_id)
         safe_record_id = escape(record_id, quote=True)
+
+        if selected_evidence_ids is None:
+            evidence_label = ""
+        elif record_id in selected_evidence_ids:
+            evidence_label = (
+                '<p class="evidence-membership">'
+                "<strong>Selected test evidence</strong>"
+                "</p>"
+            )
+        else:
+            evidence_label = (
+                '<p class="evidence-membership">'
+                "Outside selected evidence"
+                "</p>"
+            )
+
         explanations = event_explanations.get(record_id, [])
 
         categoties = list(dict.fromkeys(explanation["Result"] for explanation in explanations))
@@ -425,6 +462,11 @@ def render_event_cards(evidence, event_explanations):
             )
         cards.append(
             f'<article class="event-card" id="{anchor}" '
+            f"<h3>Event {safe_record_id}</h3>" 
+
+            f"{evidence_label}"
+
+            f"{render_event_summary(explanations)}"
             f'data-search="{safe_search_text}" '
             f'data-results="{safe_categories}">'
             f"<h3>Event {safe_record_id}</h3>"

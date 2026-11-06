@@ -1,5 +1,6 @@
 import argparse
 from datetime import datetime, timezone
+from os import error
 import sys
 from pathlib import Path
 import json
@@ -19,7 +20,8 @@ from handlers.file_handlers import (
     load_xml_file,
     load_configuration,
     load_session_metadata,
-    load_manual_test_context
+    load_manual_test_context,
+    load_test_case
 )
 from handlers.matching import (
     report_handler,
@@ -30,7 +32,8 @@ from reporting.report import (
     build_rule_report, 
     save_report_json,
     summarize_channels,
-    evaluate_manual_expectation)
+    evaluate_manual_expectation,
+    evaluate_test_case)
 
 from reporting.html_report import save_report_html
 from scripts.check_live_run import run_live_session
@@ -86,9 +89,25 @@ def main():
         type=Path,
         help="Path to manual test context JSON; requires --manual"
     )
+    parser.add_argument(
+        "--test-case",
+        type=Path,
+        help="Path to a test case JSON; requires --session"
+    )
 
     args = parser.parse_args()
     manual_session = args.manual
+
+    if args.test_case is not None and args.session is None:
+        parser.error("--test-case requires --session")
+
+    test_case = None
+
+    if args.test_case is not None:
+        try:
+            test_case = load_test_case(args.test_case)
+        except (OSError, ValueError) as error:
+            parser.error(f"Cannot load test case: {error}")
 
     if args.test_context is not None and not args.manual:
         parser.error("--test-context requires --manual")
@@ -378,6 +397,22 @@ def main():
     event_results = report_handler(events, sigma_rule)
     report = build_rule_report(sigma_rule, event_results, linked_runs)
 
+    if test_case is not None:
+        try:
+            case_evaluation = evaluate_test_case(
+                test_case,
+                session_metadata, 
+                events,
+                event_results
+            )
+        except ValueError as e:
+            parser.error(f"Cannot evaluate test case: {e}")
+
+        report["Test Case"] = deepcopy(test_case)
+
+        case_evaluation["rule_sha256"] = rule_snapshot["sha256"]
+        report["Test Case Evaluation"] = case_evaluation
+
     if args.session is not None:
         analysis_mode = "replay"
     elif args.manual or args.auto:
@@ -484,7 +519,6 @@ def main():
     )
 
     evidence_view = build_event_review_view(report)
-
     views= [metadata_view]
 
     if show_correlation:

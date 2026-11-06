@@ -25,7 +25,7 @@ def main():
 
     # Перевіряємо завантажені дані.
     print("Event count:", len(events))
-    print("Rule:", rule["title"])
+    #print("Rule:", rule["title"])
 
 
 

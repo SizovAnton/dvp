@@ -207,3 +207,96 @@ def load_configuration(default_path, override_path):
         raise ValueError(f"Configuration must be a JSON object: {override_path}")
 
     return merge_config(default, override)
+
+def load_test_case(path: Path):
+    with path.open("r", encoding="utf-8") as file:
+        test_case = json.load(file)
+
+    def require_fields(value, expected, label):
+        if not isinstance(value, dict):
+            raise ValueError(f"{label} must be an object")
+
+        missing = expected - set(value)
+        unknown = set(value) - expected
+
+        if missing:
+            raise ValueError(
+                f"{label}: missing fields: {', '.join(sorted(missing))}"
+            )
+
+        if unknown:
+            raise ValueError(
+                f"{label}: unknown fields: {', '.join(sorted(unknown))}"
+            )
+
+    require_fields(
+        test_case,
+        {
+            "schema_version",
+            "case_id",
+            "session_id",
+            "description",
+            "evidence",
+            "expectation",
+        },
+        "Test case",
+    )
+
+    version = test_case["schema_version"]
+
+    if type(version) is not int or version != 1:
+        raise ValueError("Unsupported test case schema_version")
+
+    for field in ("case_id", "session_id", "description"):
+        value = test_case[field]
+
+        if not isinstance(value, str) or not value.strip():
+            raise ValueError(f"Test case {field} must be a non-empty string")
+
+    evidence = test_case["evidence"]
+
+    require_fields(
+        evidence,
+        {"method", "reason", "record_ids"},
+        "Test case evidence",
+    )
+
+    if evidence["method"] != "manual_record_ids":
+        raise ValueError("Unsupported evidence selection method")
+
+    reason = evidence["reason"]
+
+    if not isinstance(reason, str) or not reason.strip():
+        raise ValueError("Evidence reason must be a non-empty string")
+
+    record_ids = evidence["record_ids"]
+
+    if not isinstance(record_ids, list):
+        raise ValueError("Evidence record_ids must be a list")
+
+    seen = set()
+
+    for record_id in record_ids:
+        if not isinstance(record_id, str) or not record_id.strip():
+            raise ValueError("Evidence record ID must be a non-empty string")
+
+        if record_id in seen:
+            raise ValueError(f"Duplicate evidence record ID: {record_id}")
+
+        seen.add(record_id)
+
+    expectation = test_case["expectation"]
+
+    require_fields(
+        expectation,
+        {"scope", "expected_rule_match"},
+        "Test case expectation",
+    )
+
+    if expectation["scope"] != "selected_events":
+        raise ValueError("Unsupported test case expectation scope")
+
+    if type(expectation["expected_rule_match"]) is not bool:
+        raise ValueError("expected_rule_match must be true or false")
+
+    return test_case
